@@ -90,6 +90,10 @@ body[data-screen="s-form"] .qr-card { box-shadow: none; border: 1.5px solid var(
   overflow: hidden;
 }
 .screen.active { opacity: 1; pointer-events: all; }
+/* Una pantalla oculta no puede recibir toques en NINGUNO de sus elementos
+   (algunos hijos piden pointer-events: auto y, si no, tapaban botones de otras pantallas) */
+.screen:not(.active),
+.screen:not(.active) * { pointer-events: none !important; }
 
 .logo-img { display: block; height: auto; object-fit: contain; }
 

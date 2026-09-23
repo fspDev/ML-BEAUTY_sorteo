@@ -43,7 +43,7 @@ Además, desde el panel se puede **descargar el Excel** y un **respaldo JSON** e
 
 ## Panel de control
 
-**3 toques rápidos en el logo** (arriba a la izquierda) → clave **3602**. Con teclado físico: **Ctrl + Shift + A**.
+**3 toques rápidos en el logo** (arriba a la izquierda), sin clave. Con teclado físico: **Ctrl + Shift + A**. (La clave 3602 se sigue pidiendo para sortear y para archivar la lista.)
 
 - **Inscriptos**: la lista completa (se puede eliminar alguno de prueba).
 - **Sorteos**: historial de ganadores y suplentes.

@@ -628,11 +628,11 @@ $('#admin-trigger').addEventListener('click', e => {
   adminTaps++;
   clearTimeout(adminTapT);
   adminTapT = setTimeout(() => { adminTaps = 0; }, 900);
-  if (adminTaps >= 3) { adminTaps = 0; askPin('Panel de control', openAdmin); }
+  if (adminTaps >= 3) { adminTaps = 0; openAdmin(); }
 });
 // Atajo con teclado físico: Ctrl + Shift + A
 document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') { e.preventDefault(); askPin('Panel de control', openAdmin); }
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') { e.preventDefault(); openAdmin(); }
 });
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
