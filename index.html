@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Creadores Beauty — Mercado Libre</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app">
+
+<!-- ADMIN TRIGGER: 3 toques en la esquina superior izquierda -->
+<button class="admin-trigger" id="admin-trigger" aria-hidden="true" tabindex="-1"></button>
+
+<!-- BARRA SUPERIOR: logo + QR (visible siempre, salvo durante el video) -->
+<header class="topbar" id="topbar">
+  <img class="logo-img topbar-logo" src="images/logo-ml.svg" alt="Mercado Libre">
+  <button class="btn-cancel" id="btn-cancel">✕ Cancelar</button>
+  <div class="qr-card">
+    <img src="images/qr.png" alt="Código QR Afiliados Mercado Libre">
+    <span>Escaneá y sumate<br>a Afiliados ML</span>
+  </div>
+</header>
+
+<!-- SORTEO: visible siempre (salvo video/admin), pide clave al tocarlo -->
+<button class="fab-sorteo" id="btn-draw-link">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4a1 1 0 0 0-1 1 4 4 0 0 0 4 4M17 5h3a1 1 0 0 1 1 1 4 4 0 0 1-4 4"/></svg>
+  <span>Sorteo</span>
+</button>
+
+<!-- ============================================================
+     ATTRACT — frase
+============================================================ -->
+<div class="screen active" id="s-attract">
+  <h1 class="at-question anim-2">¿Sos creador de contenido?</h1>
+  <p class="at-lead anim-3">Completá tus datos y <strong>participá.</strong></p>
+  <div class="at-prize anim-4">
+    <div class="at-prize-eyebrow">Podés ganar un cupón de</div>
+    <div class="at-prize-amount">$200.000</div>
+    <div class="at-prize-note">para canjear en Mercado Libre en <strong>productos de Belleza</strong></div>
+  </div>
+  <button class="btn-huge pulsing anim-5" tabindex="-1">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10"/><path d="M12 9.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.6a6 6 0 0 1-4.7-2.3L4 15.3a1.6 1.6 0 0 1 2.4-2.1L9 15.5"/></svg>
+    Tocá la pantalla para participar
+  </button>
+  <div class="at-count anim-6" id="at-count"></div>
+</div>
+
+<!-- ============================================================
+     VIDEO
+============================================================ -->
+<div class="screen" id="s-video">
+  <video id="attract-video" playsinline preload="auto"></video>
+  <div class="video-tap-hint">Tocá la pantalla para participar</div>
+</div>
+
+<!-- ============================================================
+     FORM
+============================================================ -->
+<div class="screen" id="s-form">
+  <div class="form-scroll" id="form-scroll">
+    <div class="section-title">Tus datos</div>
+    <div class="yellow-bar"></div>
+    <p class="section-sub">Completalos y quedás participando por el <strong>cupón de $200.000</strong></p>
+
+    <form class="form-grid" id="form" autocomplete="off" onsubmit="return false">
+      <div class="field" data-key="nombre">
+        <input id="f-nombre" type="text" placeholder=" " inputmode="none" data-kb="text" maxlength="60" spellcheck="false">
+        <label for="f-nombre">Nombre y apellido</label>
+        <div class="field-msg"></div>
+      </div>
+      <div class="field" data-key="email">
+        <input id="f-email" type="text" placeholder=" " inputmode="none" data-kb="email" maxlength="100" spellcheck="false" autocapitalize="off">
+        <label for="f-email">Mail</label>
+        <div class="field-msg"></div>
+      </div>
+
+      <div class="net-label">Tus redes <span>— completá al menos una</span></div>
+
+      <div class="field handle" data-key="instagram">
+        <input id="f-ig" type="text" placeholder=" " inputmode="none" data-kb="handle" maxlength="31" spellcheck="false" autocapitalize="off">
+        <label for="f-ig">Usuario de Instagram</label>
+        <div class="field-msg"></div>
+      </div>
+      <div class="field disabled" data-key="seguidoresInstagram">
+        <input id="f-ig-seg" type="text" placeholder=" " inputmode="none" data-kb="number" maxlength="13">
+        <label for="f-ig-seg">Seguidores en Instagram</label>
+        <div class="field-msg"></div>
+      </div>
+      <div class="field handle" data-key="tiktok">
+        <input id="f-tt" type="text" placeholder=" " inputmode="none" data-kb="handle" maxlength="31" spellcheck="false" autocapitalize="off">
+        <label for="f-tt">Usuario de TikTok</label>
+        <div class="field-msg"></div>
+      </div>
+      <div class="field disabled" data-key="seguidoresTiktok">
+        <input id="f-tt-seg" type="text" placeholder=" " inputmode="none" data-kb="number" maxlength="13">
+        <label for="f-tt-seg">Seguidores en TikTok</label>
+        <div class="field-msg"></div>
+      </div>
+
+      <button type="button" class="consent span-2" id="consent" aria-pressed="false">
+        <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        Acepto participar del sorteo y que me contacten por mail si gano.
+      </button>
+
+      <div class="form-error span-2" id="form-error"></div>
+      <button type="button" class="btn-primary span-2" id="btn-submit">¡Quiero participar!</button>
+    </form>
+  </div>
+  <div class="kb" id="kb"></div>
+</div>
+
+<!-- ============================================================
+     JAR — frasco con física (confirmación + sorteo)
+============================================================ -->
+<div class="screen" id="s-jar">
+  <canvas id="jar-canvas"></canvas>
+
+  <!-- Modo confirmación -->
+  <div class="jar-info" id="jar-confirm">
+    <div class="jar-eyebrow">¡Inscripción confirmada!</div>
+    <div class="jar-title" id="jar-title">¡Ya estás participando!</div>
+    <p class="jar-sub">Tu nombre ya está en el frasco. Sorteamos el <strong>cupón de $200.000</strong> al finalizar el evento y le escribimos por mail a quien gane.</p>
+    <div class="jar-count"><b id="jar-count-n">0</b> <span id="jar-count-lbl">creadores en el frasco</span></div>
+    <div class="jar-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10"/><path d="M12 9.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.6a6 6 0 0 1-4.7-2.3L4 15.3a1.6 1.6 0 0 1 2.4-2.1L9 15.5"/></svg>
+      Tocá y arrastrá los nombres
+    </div>
+    <div class="jar-spacer"></div>
+    <div class="jar-actions">
+      <button class="btn-outline" id="btn-shake">Sacudir el frasco</button>
+      <button class="btn-huge" id="btn-done">Listo</button>
+    </div>
+    <div class="countdown-wrap">
+      <div class="countdown-lbl" id="jar-cd-lbl">Volviendo al inicio…</div>
+      <div class="countdown-track"><div class="countdown-fill" id="jar-cd-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Modo sorteo -->
+  <div class="jar-info" id="jar-draw" style="display:none">
+    <div class="jar-eyebrow">Sorteo</div>
+    <div class="jar-title">Cupón de $200.000 en Belleza</div>
+    <div class="jar-count"><b id="draw-count-n">0</b> <span id="draw-count-lbl">participantes en el sorteo</span></div>
+    <button class="draw-toggle on" id="draw-exclude">
+      <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+      <span>Excluir a quienes ya salieron sorteados</span>
+    </button>
+    <div class="jar-spacer"></div>
+    <div class="jar-actions">
+      <button class="btn-huge pulsing" id="btn-run-draw">¡Sortear!</button>
+      <button class="btn-outline" id="btn-exit-draw">Salir</button>
+    </div>
+  </div>
+
+  <!-- Ganador -->
+  <div class="winner-layer" id="winner-layer">
+    <div class="winner-card">
+      <div class="prize-fx" id="prize-fx"></div>
+      <div class="winner-eyebrow" id="winner-eyebrow">¡Felicitaciones!</div>
+      <div class="winner-name" id="winner-name"></div>
+      <div class="winner-handles" id="winner-handles"></div>
+      <div class="winner-meta" id="winner-meta"></div>
+      <div class="winner-actions">
+        <button class="btn-outline" id="btn-redraw">Sortear suplente</button>
+        <button class="btn-huge" id="btn-winner-close">Terminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ADMIN
+============================================================ -->
+<div class="screen" id="s-admin">
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <h2 class="admin-title">Panel de Control</h2>
+      <div class="admin-count" id="admin-count">Inscriptos: 0</div>
+    </div>
+    <div class="admin-status" id="admin-status"></div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="leads">Inscriptos</button>
+      <button class="admin-tab" data-tab="draws">Sorteos</button>
+      <button class="admin-tab" data-tab="config">Configuración</button>
+    </div>
+
+    <div class="admin-content">
+      <div class="tab-section active" id="tab-leads">
+        <table class="admin-table">
+          <thead><tr>
+            <th>Fecha</th><th>Nombre</th><th>Mail</th><th>Instagram</th><th>Seg. IG</th><th>TikTok</th><th>Seg. TikTok</th><th></th>
+          </tr></thead>
+          <tbody id="admin-tbody"></tbody>
+        </table>
+      </div>
+      <div class="tab-section" id="tab-draws">
+        <table class="admin-table">
+          <thead><tr><th>Fecha</th><th>Ganador/a</th><th>Mail</th><th>Instagram</th><th>TikTok</th><th>Tipo</th><th>Participantes</th></tr></thead>
+          <tbody id="draws-tbody"></tbody>
+        </table>
+      </div>
+      <div class="tab-section" id="tab-config">
+        <div class="cfg-row">
+          <label class="cfg-label" for="cfg-phrase">Segundos de la frase antes del video</label>
+          <input type="number" class="cfg-input" id="cfg-phrase" min="3" max="600">
+        </div>
+        <div class="cfg-row">
+          <label class="cfg-label" for="cfg-form-idle">Inactividad en el formulario (segundos)</label>
+          <input type="number" class="cfg-input" id="cfg-form-idle" min="20" max="900">
+          <div class="cfg-help">Si nadie toca la pantalla durante este tiempo, se borra lo cargado y vuelve a la frase.</div>
+        </div>
+        <div class="cfg-row">
+          <label class="cfg-label" for="cfg-jar">Segundos en el frasco después de inscribirse</label>
+          <input type="number" class="cfg-input" id="cfg-jar" min="5" max="600">
+        </div>
+        <div class="cfg-row">
+          <label class="cfg-check"><input type="checkbox" id="cfg-sound"> Reproducir el video con sonido</label>
+        </div>
+        <div class="cfg-row">
+          <label class="cfg-label" for="cfg-label">Cómo se ven los nombres en el frasco</label>
+          <select class="cfg-input" id="cfg-label">
+            <option value="corto">Nombre + inicial (Sofía G.)</option>
+            <option value="completo">Nombre completo</option>
+            <option value="usuario">@usuario de la red</option>
+          </select>
+        </div>
+        <div class="cfg-row">
+          <label class="cfg-label">Empezar de cero</label>
+          <button class="btn-admin btn-clear" id="btn-archive">Archivar inscriptos y vaciar</button>
+          <div class="cfg-help">Guarda una copia en <code>data/archivado_…</code> y deja la lista vacía. Nunca se borra nada del disco.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-actions">
+      <button class="btn-admin btn-draw" id="btn-admin-draw">Ir al sorteo</button>
+      <button class="btn-admin btn-export" id="btn-export-csv">Descargar Excel (CSV)</button>
+      <button class="btn-admin btn-json" id="btn-export-json">Descargar respaldo (JSON)</button>
+      <button class="btn-admin btn-save" id="btn-save-cfg" style="display:none">Guardar configuración</button>
+      <button class="btn-admin btn-close-admin" id="btn-close-admin">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN -->
+<div class="pin-layer" id="pin-layer">
+  <div class="pin-card" id="pin-card">
+    <div class="pin-title" id="pin-title">Ingresá la clave</div>
+    <div class="pin-dots" id="pin-dots"><i></i><i></i><i></i><i></i></div>
+    <div class="pin-pad" id="pin-pad">
+      <button data-d="1">1</button><button data-d="2">2</button><button data-d="3">3</button>
+      <button data-d="4">4</button><button data-d="5">5</button><button data-d="6">6</button>
+      <button data-d="7">7</button><button data-d="8">8</button><button data-d="9">9</button>
+      <button class="muted" data-d="cancel">Cancelar</button><button data-d="0">0</button><button class="muted" data-d="back">⌫</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script src="lib/matter.min.js"></script>
+<script src="js/db.js"></script>
+<script src="js/keyboard.js"></script>
+<script src="js/jar.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
