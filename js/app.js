@@ -4,6 +4,9 @@
 // ============================================================
 const PASSWORD = '3602';
 const VIDEO_SRC = 'video/video.mp4';
+// Versión de las Bases y Condiciones / Declaración de Privacidad que se muestran.
+// Si cambian los textos, cambiar esta versión: queda guardada con cada consentimiento.
+const BYC_VERSION = 'ByC y DDP v1 (2026-09)';
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -135,6 +138,7 @@ const F = {
 };
 const ORDER = ['nombre', 'email', 'instagram', 'seguidoresInstagram', 'tiktok', 'seguidoresTiktok'];
 let consent = false;
+let consentAt = null;   // momento en que se tildó la casilla de ByC
 
 const fieldOf = key => F[key].closest('.field');
 
@@ -153,7 +157,9 @@ function resetForm() {
   fieldOf('seguidoresInstagram').classList.add('disabled');
   fieldOf('seguidoresTiktok').classList.add('disabled');
   consent = false;
+  consentAt = null;
   $('#consent').classList.remove('checked', 'invalid');
+  $('#consent').setAttribute('aria-pressed', false);
   $('#form-error').textContent = '';
   $('#btn-submit').classList.remove('enabled', 'busy');
   $('#btn-submit').textContent = '¡Quiero participar!';
@@ -290,6 +296,7 @@ function nextField(input) {
 
 $('#consent').addEventListener('click', () => {
   consent = !consent;
+  consentAt = consent ? new Date() : null;
   $('#consent').classList.toggle('checked', consent);
   $('#consent').classList.remove('invalid');
   $('#consent').setAttribute('aria-pressed', consent);
@@ -352,7 +359,7 @@ async function submit() {
       c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
     }
     $('#form-error').textContent = bad.length ? fieldOf(bad[0]).querySelector('.field-msg').textContent
-                                              : 'Falta aceptar las condiciones del sorteo';
+                                              : 'Falta aceptar las Bases y Condiciones';
     return;
   }
 
@@ -373,6 +380,11 @@ async function submit() {
     tiktok: v.tiktok,
     seguidoresTiktok: v.tiktok ? digits(v.seguidoresTiktok) || 0 : 0,
     acepta: true,
+    // Constancia del consentimiento (ByC + Declaración de Privacidad)
+    consentimientoFecha: (consentAt || now).toISOString(),
+    consentimientoFechaLocal: (consentAt || now).toLocaleString('es-AR'),
+    consentimientoTexto: $('#consent-text').textContent.trim(),
+    consentimientoVersion: BYC_VERSION,
   };
 
   const r = await DB.add(p);
@@ -395,7 +407,7 @@ function jarArea() {
   const spacer = panel.querySelector('.jar-spacer');
   const r = spacer.getBoundingClientRect();
   if (r.height > 0) return { top: r.top, bottom: r.bottom };
-  return { top: $('#topbar').getBoundingClientRect().bottom, bottom: innerHeight };
+  return { top: $('#topbar').getBoundingClientRect().bottom, bottom: $('#bottombar').getBoundingClientRect().top };
 }
 
 // ============================================================
@@ -412,9 +424,6 @@ async function showJarConfirm(p) {
   $('#jar-draw').style.display = 'none';
   $('#btn-draw-link').style.display = '';
   $('#jar-title').textContent = `${firstName(p.nombre)}, ya estás participando`;
-  const n = DB.participants.length;
-  $('#jar-count-n').textContent = fmtNum(n);
-  $('#jar-count-lbl').textContent = n === 1 ? 'creador en el frasco' : 'creadores en el frasco';
   goTo('s-jar');
   await fontsReady;
   Jar.open({ items: jarItems(), newId: p.id, area: jarArea });
@@ -681,8 +690,9 @@ function renderAdmin() {
       <td class="num">${p.instagram ? fmtNum(p.seguidoresInstagram) : '—'}</td>
       <td>${p.tiktok ? '@' + esc(p.tiktok) : '—'}</td>
       <td class="num">${p.tiktok ? fmtNum(p.seguidoresTiktok) : '—'}</td>
+      <td title="${esc(p.consentimientoFechaLocal || '')}">${p.acepta ? '✓' : '—'}</td>
       <td><button class="row-del" data-id="${esc(p.id)}" title="Eliminar">✕</button></td>
-    </tr>`).join('') : '<tr><td colspan="8" class="admin-empty">Todavía no hay inscriptos</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="9" class="admin-empty">Todavía no hay inscriptos</td></tr>';
 
   const draws = [...DB.draws].sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
   $('#draws-tbody').innerHTML = draws.length ? draws.map(d => `
@@ -745,13 +755,16 @@ function csvCell(v) { const s = String(v ?? ''); return /[";\n\r]/.test(s) ? '"'
 $('#btn-export-csv').addEventListener('click', () => {
   const list = [...DB.participants].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
   if (!list.length) return toast('No hay inscriptos para descargar');
-  const head = ['Fecha', 'Nombre', 'Email', 'Instagram', 'Seguidores Instagram', 'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok', 'ID'];
+  const head = ['Fecha', 'Nombre', 'Email', 'Instagram', 'Seguidores Instagram', 'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok',
+                'Acepta ByC y DDP', 'Fecha consentimiento', 'Fecha consentimiento (UTC)', 'Texto aceptado', 'Versión ByC', 'ID'];
   const rows = list.map(p => [
     p.fechaLocal, p.nombre, p.email,
     p.instagram ? '@' + p.instagram : '', p.instagram ? p.seguidoresInstagram : '',
     p.tiktok ? '@' + p.tiktok : '', p.tiktok ? p.seguidoresTiktok : '',
     p.instagram ? 'https://instagram.com/' + p.instagram : '',
-    p.tiktok ? 'https://tiktok.com/@' + p.tiktok : '', p.id
+    p.tiktok ? 'https://tiktok.com/@' + p.tiktok : '',
+    p.acepta ? 'SI' : 'NO', p.consentimientoFechaLocal, p.consentimientoFecha, p.consentimientoTexto, p.consentimientoVersion,
+    p.id
   ]);
   download(`inscriptos_${stamp()}.csv`, '﻿' + [head, ...rows].map(r => r.map(csvCell).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
 });
@@ -791,10 +804,14 @@ DB.onChange(() => {
 // ============================================================
 // INICIO
 // ============================================================
-// Alto de la barra superior (logo + QR) para dejarle lugar en cada pantalla
+// Alto de las barras (logo arriba, QR abajo) para dejarles lugar en cada pantalla
 new ResizeObserver(() => {
   document.documentElement.style.setProperty('--top-h', $('#topbar').offsetHeight + 'px');
+  document.documentElement.style.setProperty('--bot-h', $('#bottombar').offsetHeight + 'px');
 }).observe($('#topbar'));
+new ResizeObserver(() => {
+  document.documentElement.style.setProperty('--bot-h', $('#bottombar').offsetHeight + 'px');
+}).observe($('#bottombar'));
 
 Jar.init($('#jar-canvas'));
 showAttract();

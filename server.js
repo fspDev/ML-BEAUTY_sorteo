@@ -57,13 +57,15 @@ function csvCell(v) {
 function toCSV(list) {
   // Separador ";" para que Excel en español lo abra en columnas
   const head = ['Fecha', 'Nombre', 'Email', 'Instagram', 'Seguidores Instagram',
-                'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok', 'ID'];
+                'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok',
+                'Acepta ByC y DDP', 'Fecha consentimiento', 'Fecha consentimiento (UTC)', 'Texto aceptado', 'Versión ByC', 'ID'];
   const rows = list.map(p => [
     p.fechaLocal, p.nombre, p.email,
     p.instagram ? '@' + p.instagram : '', p.instagram ? p.seguidoresInstagram : '',
     p.tiktok ? '@' + p.tiktok : '', p.tiktok ? p.seguidoresTiktok : '',
     p.instagram ? 'https://instagram.com/' + p.instagram : '',
     p.tiktok ? 'https://tiktok.com/@' + p.tiktok : '',
+    p.acepta ? 'SI' : 'NO', p.consentimientoFechaLocal, p.consentimientoFecha, p.consentimientoTexto, p.consentimientoVersion,
     p.id
   ]);
   return '﻿' + [head, ...rows].map(r => r.map(csvCell).join(';')).join('\r\n');
@@ -109,8 +111,15 @@ function clean(p) {
     seguidoresInstagram: num(p.seguidoresInstagram),
     tiktok:              handle(p.tiktok),
     seguidoresTiktok:    num(p.seguidoresTiktok),
-    acepta:              !!p.acepta
+    acepta:              p.acepta === true,
+    // Constancia del consentimiento a las Bases y Condiciones y la Declaración de Privacidad
+    consentimientoFecha:      String(p.consentimientoFecha || p.fecha || '').slice(0, 40),
+    consentimientoFechaLocal: String(p.consentimientoFechaLocal || p.fechaLocal || '').slice(0, 40),
+    consentimientoTexto:      String(p.consentimientoTexto || '').slice(0, 500),
+    consentimientoVersion:    String(p.consentimientoVersion || '').slice(0, 80)
   };
+  // Sin aceptación de las ByC no se guarda la inscripción
+  if (!out.acepta) return null;
   if (!out.id || out.nombre.length < 2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(out.email)
       || (!out.instagram && !out.tiktok)) return null;
   return out;
