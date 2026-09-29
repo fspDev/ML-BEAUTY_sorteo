@@ -134,7 +134,8 @@ const F = {
   tiktok: $('#f-tt'), seguidoresTiktok: $('#f-tt-seg'),
 };
 const ORDER = ['nombre', 'email', 'instagram', 'seguidoresInstagram', 'tiktok', 'seguidoresTiktok'];
-// Documentos legales: cada uno se acepta por separado y queda registrado con su versión
+// Documentos legales: cada uno se acepta por separado y queda registrado con fecha, texto y versión.
+// Si cambia un PDF, cambiar su versión.
 const LEGAL = {
   bases:      { titulo: 'Bases y Condiciones',       archivo: 'legal/bases.pdf',       version: 'ByC Sorteo Afiliados ExpoEstética (26/09/2026)' },
   privacidad: { titulo: 'Declaración de Privacidad', archivo: 'legal/privacidad.pdf', version: 'DDP Expo Estética Beauty (23/09/2026)' },
@@ -409,9 +410,11 @@ async function submit() {
     aceptaBases: true,
     aceptaBasesFecha: consent.bases,
     aceptaBasesVersion: LEGAL.bases.version,
+    aceptaBasesTexto: consentBtn('bases').textContent.trim(),
     aceptaPrivacidad: true,
     aceptaPrivacidadFecha: consent.privacidad,
     aceptaPrivacidadVersion: LEGAL.privacidad.version,
+    aceptaPrivacidadTexto: consentBtn('privacidad').textContent.trim(),
   };
 
   const r = await DB.add(p);
@@ -434,7 +437,7 @@ function jarArea() {
   const spacer = panel.querySelector('.jar-spacer');
   const r = spacer.getBoundingClientRect();
   if (r.height > 0) return { top: r.top, bottom: r.bottom };
-  return { top: $('#topbar').getBoundingClientRect().bottom, bottom: innerHeight };
+  return { top: $('#topbar').getBoundingClientRect().bottom, bottom: $('#bottombar').getBoundingClientRect().top };
 }
 
 // ============================================================
@@ -451,9 +454,6 @@ async function showJarConfirm(p) {
   $('#jar-draw').style.display = 'none';
   $('#btn-draw-link').style.display = '';
   $('#jar-title').textContent = `${firstName(p.nombre)}, ya estás participando`;
-  const n = DB.participants.length;
-  $('#jar-count-n').textContent = fmtNum(n);
-  $('#jar-count-lbl').textContent = n === 1 ? 'creador en el frasco' : 'creadores en el frasco';
   goTo('s-jar');
   await fontsReady;
   Jar.open({ items: jarItems(), newId: p.id, area: jarArea });
@@ -720,8 +720,9 @@ function renderAdmin() {
       <td class="num">${p.instagram ? fmtNum(p.seguidoresInstagram) : '—'}</td>
       <td>${p.tiktok ? '@' + esc(p.tiktok) : '—'}</td>
       <td class="num">${p.tiktok ? fmtNum(p.seguidoresTiktok) : '—'}</td>
+      <td title="ByC: ${esc(fmtFecha(p.aceptaBasesFecha))} · DDP: ${esc(fmtFecha(p.aceptaPrivacidadFecha))}">${p.aceptaBases && p.aceptaPrivacidad ? '✓' : '—'}</td>
       <td><button class="row-del" data-id="${esc(p.id)}" title="Eliminar">✕</button></td>
-    </tr>`).join('') : '<tr><td colspan="8" class="admin-empty">Todavía no hay inscriptos</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="9" class="admin-empty">Todavía no hay inscriptos</td></tr>';
 
   const draws = [...DB.draws].sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
   $('#draws-tbody').innerHTML = draws.length ? draws.map(d => `
@@ -782,10 +783,11 @@ const stamp = () => new Date().toISOString().slice(0, 16).replace(/[T:]/g, '-');
 function csvCell(v) { const s = String(v ?? ''); return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
 
 const LEGAL_HEAD = ['Acepta Bases y Condiciones', 'Fecha aceptación ByC', 'Versión ByC',
-                    'Acepta Declaración de Privacidad', 'Fecha aceptación DDP', 'Versión DDP'];
+                    'Acepta Declaración de Privacidad', 'Fecha aceptación DDP', 'Versión DDP', 'Texto aceptado ByC', 'Texto aceptado DDP'];
 const fmtFecha = iso => iso ? new Date(iso).toLocaleString('es-AR', { hour12: false }) : '';
 const legalCols = p => [p.aceptaBases ? 'SÍ' : 'NO', fmtFecha(p.aceptaBasesFecha), p.aceptaBasesVersion || '',
-                        p.aceptaPrivacidad ? 'SÍ' : 'NO', fmtFecha(p.aceptaPrivacidadFecha), p.aceptaPrivacidadVersion || ''];
+                        p.aceptaPrivacidad ? 'SÍ' : 'NO', fmtFecha(p.aceptaPrivacidadFecha), p.aceptaPrivacidadVersion || '',
+                        p.aceptaBasesTexto || '', p.aceptaPrivacidadTexto || ''];
 
 $('#btn-export-csv').addEventListener('click', () => {
   const list = [...DB.participants].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
@@ -836,10 +838,14 @@ DB.onChange(() => {
 // ============================================================
 // INICIO
 // ============================================================
-// Alto de la barra superior (logo + QR) para dejarle lugar en cada pantalla
+// Alto de las barras (logo arriba, QR abajo) para dejarles lugar en cada pantalla
 new ResizeObserver(() => {
   document.documentElement.style.setProperty('--top-h', $('#topbar').offsetHeight + 'px');
+  document.documentElement.style.setProperty('--bot-h', $('#bottombar').offsetHeight + 'px');
 }).observe($('#topbar'));
+new ResizeObserver(() => {
+  document.documentElement.style.setProperty('--bot-h', $('#bottombar').offsetHeight + 'px');
+}).observe($('#bottombar'));
 
 Jar.init($('#jar-canvas'));
 showAttract();

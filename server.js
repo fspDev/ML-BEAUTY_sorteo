@@ -61,7 +61,7 @@ function toCSV(list) {
   const head = ['Fecha', 'Nombre', 'Email', 'Instagram', 'Seguidores Instagram',
                 'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok',
                 'Acepta Bases y Condiciones', 'Fecha aceptación ByC', 'Versión ByC',
-                'Acepta Declaración de Privacidad', 'Fecha aceptación DDP', 'Versión DDP', 'ID'];
+                'Acepta Declaración de Privacidad', 'Fecha aceptación DDP', 'Versión DDP', 'Texto aceptado ByC', 'Texto aceptado DDP', 'ID'];
   const rows = list.map(p => [
     p.fechaLocal, p.nombre, p.email,
     p.instagram ? '@' + p.instagram : '', p.instagram ? p.seguidoresInstagram : '',
@@ -70,6 +70,7 @@ function toCSV(list) {
     p.tiktok ? 'https://tiktok.com/@' + p.tiktok : '',
     p.aceptaBases ? 'SÍ' : 'NO', fecha(p.aceptaBasesFecha), p.aceptaBasesVersion || '',
     p.aceptaPrivacidad ? 'SÍ' : 'NO', fecha(p.aceptaPrivacidadFecha), p.aceptaPrivacidadVersion || '',
+    p.aceptaBasesTexto || '', p.aceptaPrivacidadTexto || '',
     p.id
   ]);
   return '﻿' + [head, ...rows].map(r => r.map(csvCell).join(';')).join('\r\n');
@@ -115,14 +116,19 @@ function clean(p) {
     seguidoresInstagram: num(p.seguidoresInstagram),
     tiktok:              handle(p.tiktok),
     seguidoresTiktok:    num(p.seguidoresTiktok),
-    acepta:              !!p.acepta,
+    acepta:              p.acepta === true,
+    // Constancia del consentimiento: cada documento por separado, con fecha, versión y texto de la casilla
     aceptaBases:             !!p.aceptaBases,
     aceptaBasesFecha:        p.aceptaBasesFecha ? String(p.aceptaBasesFecha).slice(0, 40) : null,
     aceptaBasesVersion:      String(p.aceptaBasesVersion || '').slice(0, 120),
     aceptaPrivacidad:        !!p.aceptaPrivacidad,
     aceptaPrivacidadFecha:   p.aceptaPrivacidadFecha ? String(p.aceptaPrivacidadFecha).slice(0, 40) : null,
-    aceptaPrivacidadVersion: String(p.aceptaPrivacidadVersion || '').slice(0, 120)
+    aceptaPrivacidadVersion: String(p.aceptaPrivacidadVersion || '').slice(0, 120),
+    aceptaBasesTexto:        String(p.aceptaBasesTexto || '').slice(0, 300),
+    aceptaPrivacidadTexto:   String(p.aceptaPrivacidadTexto || '').slice(0, 300)
   };
+  // Sin aceptación de las ByC no se guarda la inscripción
+  if (!out.acepta || !out.aceptaBases || !out.aceptaPrivacidad) return null;
   if (!out.id || out.nombre.length < 2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(out.email)
       || (!out.instagram && !out.tiktok)) return null;
   return out;

@@ -11,9 +11,13 @@ Está pensada para una **TV táctil de 55" en vertical** conectada a una noteboo
 3. Al confirmar → el **frasco**: su nombre cae adentro con los de los demás. Se pueden arrastrar con el dedo, sacudir el frasco con el botón o dándole un toque al vidrio. A los 30 s vuelve a la frase (siempre 30 s, se interactúe o no; se cambia en el panel).
 4. **Sorteo**: botón **“Sorteo”** abajo a la derecha (visible en la pantalla de inicio y en la del frasco) → clave **3602**.
 
-El **QR** y el logo están arriba en todas las pantallas, salvo mientras se reproduce el video. El QR lleva a https://www.mercadolibre.com.ar/l/afiliados?forceInApp=true (programa de Afiliados). Para cambiarlo: `npx qrcode -o images/qr.png -w 1000 -q 1 -e M -d 2D3277FF -l FFFFFF00 "<link>"`.
+El **logo** está arriba y el **QR** abajo a la izquierda en todas las pantallas, salvo mientras se reproduce el video (el QR tampoco se muestra en el formulario, porque ahí va el teclado). El QR lleva a https://www.mercadolibre.com.ar/l/afiliados?forceInApp=true (programa de Afiliados). Para cambiarlo: `npx qrcode -o images/qr.png -w 1000 -q 1 -e M -d 2D3277FF -l FFFFFF00 "<link>"`.
 
 No se puede inscribir dos veces el mismo **mail**, **Instagram** ni **TikTok** (sin importar mayúsculas ni la @).
+
+### Constancia del consentimiento (ByC y Declaración de Privacidad)
+
+Cada inscripción guarda, además de los datos, **una constancia por documento**: `aceptaBases` / `aceptaPrivacidad` (el servidor rechaza inscripciones sin los dos), `aceptaBasesFecha` / `aceptaPrivacidadFecha` (fecha y hora exacta en que se tildó cada casilla, UTC), `…Version` (la versión del PDF, en `LEGAL` al principio de `js/app.js`: **cambiarla si cambia un documento**) y `…Texto` (el texto exacto de la casilla). Queda en `participantes.json`, en el historial `registro.log.jsonl` y como columnas en el Excel.
 
 ## Poner en marcha (en la notebook del evento)
 
@@ -51,7 +55,7 @@ Además, desde el panel se puede **descargar el Excel** y un **respaldo JSON** e
 
 ## Panel de control
 
-**3 toques rápidos en el logo** (arriba a la izquierda), sin clave. Con teclado físico: **Ctrl + Shift + A**. (La clave 3602 se sigue pidiendo para sortear y para archivar la lista.)
+**3 toques rápidos en el logo** (arriba al centro), sin clave. Con teclado físico: **Ctrl + Shift + A**. (La clave 3602 se sigue pidiendo para sortear y para archivar la lista.)
 
 - **Inscriptos**: la lista completa (se puede eliminar alguno de prueba).
 - **Sorteos**: historial de ganadores y suplentes.
