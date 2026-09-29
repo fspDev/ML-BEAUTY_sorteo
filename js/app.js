@@ -134,7 +134,14 @@ const F = {
   tiktok: $('#f-tt'), seguidoresTiktok: $('#f-tt-seg'),
 };
 const ORDER = ['nombre', 'email', 'instagram', 'seguidoresInstagram', 'tiktok', 'seguidoresTiktok'];
-let consent = false;
+// Documentos legales: cada uno se acepta por separado y queda registrado con su versión
+const LEGAL = {
+  bases:      { titulo: 'Bases y Condiciones',       archivo: 'legal/bases.pdf',       version: 'ByC Sorteo Afiliados ExpoEstética (26/09/2026)' },
+  privacidad: { titulo: 'Declaración de Privacidad', archivo: 'legal/privacidad.pdf', version: 'DDP Expo Estética Beauty (23/09/2026)' },
+};
+const consent = { bases: null, privacidad: null };   // fecha ISO en que se tildó, o null
+const consentOk = () => !!(consent.bases && consent.privacidad);
+const consentBtn = k => $(`.consent[data-consent="${k}"]`);
 
 const fieldOf = key => F[key].closest('.field');
 
@@ -152,8 +159,12 @@ function resetForm() {
   $$('#form .field').forEach(f => f.classList.remove('invalid', 'valid', 'filled'));
   fieldOf('seguidoresInstagram').classList.add('disabled');
   fieldOf('seguidoresTiktok').classList.add('disabled');
-  consent = false;
-  $('#consent').classList.remove('checked', 'invalid');
+  Object.keys(consent).forEach(k => {
+    consent[k] = null;
+    consentBtn(k).classList.remove('checked', 'invalid');
+    consentBtn(k).setAttribute('aria-pressed', 'false');
+  });
+  closeDoc();
   $('#form-error').textContent = '';
   $('#btn-submit').classList.remove('enabled', 'busy');
   $('#btn-submit').textContent = '¡Quiero participar!';
@@ -162,7 +173,8 @@ function resetForm() {
 
 function bumpFormIdle() {
   clearTimeout(formIdleT);
-  formIdleT = setTimeout(() => { if (current === 's-form') showAttract(); }, cfg.formIdleSecs * 1000);
+  const secs = $('#doc-layer').classList.contains('show') ? Math.max(cfg.formIdleSecs, 300) : cfg.formIdleSecs;  // leyendo un documento: más margen
+  formIdleT = setTimeout(() => { if (current === 's-form') { closeDoc(); showAttract(); } }, secs * 1000);
 }
 
 // Limpieza de lo que se escribe
@@ -227,7 +239,7 @@ function setFieldState(key, msg, show) {
 
 function refreshSubmit() {
   const v = values();
-  const ok = ORDER.every(k => !check(k, v)) && consent;
+  const ok = ORDER.every(k => !check(k, v)) && consentOk();
   $('#btn-submit').classList.toggle('enabled', ok);
   return ok;
 }
@@ -284,17 +296,36 @@ function nextField(input) {
   if (next) focusField(F[next]);
   else {
     input.blur();
-    setTimeout(() => $('#consent').scrollIntoView({ block: 'center', behavior: 'smooth' }), 350);
+    setTimeout(() => $('#legal').scrollIntoView({ block: 'center', behavior: 'smooth' }), 350);
   }
 }
 
-$('#consent').addEventListener('click', () => {
-  consent = !consent;
-  $('#consent').classList.toggle('checked', consent);
-  $('#consent').classList.remove('invalid');
-  $('#consent').setAttribute('aria-pressed', consent);
+$$('.consent[data-consent]').forEach(btn => btn.addEventListener('click', () => {
+  const k = btn.dataset.consent;
+  consent[k] = consent[k] ? null : new Date().toISOString();
+  btn.classList.toggle('checked', !!consent[k]);
+  btn.classList.remove('invalid');
+  btn.setAttribute('aria-pressed', String(!!consent[k]));
   refreshSubmit();
-});
+}));
+
+// Visor de documentos (el QR es para leerlos en el celular; acá también se pueden leer en la TV)
+$$('.legal-doc').forEach(btn => btn.addEventListener('click', () => openDoc(btn.dataset.doc)));
+$('#doc-close').addEventListener('click', closeDoc);
+function openDoc(k) {
+  const d = LEGAL[k];
+  Keyboard.hide();
+  $('#doc-title').textContent = d.titulo;
+  $('#doc-frame').src = d.archivo + '#view=FitH&toolbar=0&navpanes=0';
+  $('#doc-layer').classList.add('show');
+  bumpFormIdle();
+}
+function closeDoc() {
+  if (!$('#doc-layer').classList.contains('show')) return;
+  $('#doc-layer').classList.remove('show');
+  $('#doc-frame').src = 'about:blank';
+  if (current === 's-form') bumpFormIdle();
+}
 
 // Tocar fuera de un campo oculta el teclado
 $('#form-scroll').addEventListener('pointerdown', e => {
@@ -340,19 +371,21 @@ $('#btn-submit').addEventListener('click', submit);
 async function submit() {
   const v = values();
   const bad = ORDER.filter(k => check(k, v));
-  if (bad.length || !consent) {
+  if (bad.length || !consentOk()) {
     bad.forEach(k => {
       setFieldState(k, check(k, v), true);
       const f = fieldOf(k);
       f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake');
     });
-    if (!consent) {
-      const c = $('#consent');
+    Object.keys(consent).filter(k => !consent[k]).forEach(k => {
+      const c = consentBtn(k);
       c.classList.add('invalid');
       c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
-    }
+    });
     $('#form-error').textContent = bad.length ? fieldOf(bad[0]).querySelector('.field-msg').textContent
-                                              : 'Falta aceptar las condiciones del sorteo';
+                                              : !consent.bases && !consent.privacidad ? 'Falta aceptar las Bases y Condiciones y la Declaración de Privacidad'
+                                              : !consent.bases ? 'Falta aceptar las Bases y Condiciones'
+                                              : 'Falta aceptar la Declaración de Privacidad';
     return;
   }
 
@@ -365,7 +398,7 @@ async function submit() {
   const p = {
     id: uid(),
     fecha: now.toISOString(),
-    fechaLocal: now.toLocaleString('es-AR'),
+    fechaLocal: now.toLocaleString('es-AR', { hour12: false }),
     nombre: v.nombre.replace(/\s+/g, ' '),
     email: v.email,
     instagram: v.instagram,
@@ -373,6 +406,12 @@ async function submit() {
     tiktok: v.tiktok,
     seguidoresTiktok: v.tiktok ? digits(v.seguidoresTiktok) || 0 : 0,
     acepta: true,
+    aceptaBases: true,
+    aceptaBasesFecha: consent.bases,
+    aceptaBasesVersion: LEGAL.bases.version,
+    aceptaPrivacidad: true,
+    aceptaPrivacidadFecha: consent.privacidad,
+    aceptaPrivacidadVersion: LEGAL.privacidad.version,
   };
 
   const r = await DB.add(p);
@@ -504,7 +543,7 @@ async function runDraw(isSub) {
   const d = {
     id: uid(),
     fecha: now.toISOString(),
-    fechaLocal: now.toLocaleString('es-AR'),
+    fechaLocal: now.toLocaleString('es-AR', { hour12: false }),
     participanteId: w.id,
     nombre: w.nombre, email: w.email,
     instagram: w.instagram, tiktok: w.tiktok,
@@ -742,16 +781,22 @@ const stamp = () => new Date().toISOString().slice(0, 16).replace(/[T:]/g, '-');
 
 function csvCell(v) { const s = String(v ?? ''); return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
 
+const LEGAL_HEAD = ['Acepta Bases y Condiciones', 'Fecha aceptación ByC', 'Versión ByC',
+                    'Acepta Declaración de Privacidad', 'Fecha aceptación DDP', 'Versión DDP'];
+const fmtFecha = iso => iso ? new Date(iso).toLocaleString('es-AR', { hour12: false }) : '';
+const legalCols = p => [p.aceptaBases ? 'SÍ' : 'NO', fmtFecha(p.aceptaBasesFecha), p.aceptaBasesVersion || '',
+                        p.aceptaPrivacidad ? 'SÍ' : 'NO', fmtFecha(p.aceptaPrivacidadFecha), p.aceptaPrivacidadVersion || ''];
+
 $('#btn-export-csv').addEventListener('click', () => {
   const list = [...DB.participants].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
   if (!list.length) return toast('No hay inscriptos para descargar');
-  const head = ['Fecha', 'Nombre', 'Email', 'Instagram', 'Seguidores Instagram', 'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok', 'ID'];
+  const head = ['Fecha', 'Nombre', 'Email', 'Instagram', 'Seguidores Instagram', 'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok', ...LEGAL_HEAD, 'ID'];
   const rows = list.map(p => [
     p.fechaLocal, p.nombre, p.email,
     p.instagram ? '@' + p.instagram : '', p.instagram ? p.seguidoresInstagram : '',
     p.tiktok ? '@' + p.tiktok : '', p.tiktok ? p.seguidoresTiktok : '',
     p.instagram ? 'https://instagram.com/' + p.instagram : '',
-    p.tiktok ? 'https://tiktok.com/@' + p.tiktok : '', p.id
+    p.tiktok ? 'https://tiktok.com/@' + p.tiktok : '', ...legalCols(p), p.id
   ]);
   download(`inscriptos_${stamp()}.csv`, '﻿' + [head, ...rows].map(r => r.map(csvCell).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
 });

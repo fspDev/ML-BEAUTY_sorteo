@@ -7,6 +7,7 @@ Está pensada para una **TV táctil de 55" en vertical** conectada a una noteboo
 
 1. **Frase** (“¿Sos creador de contenido?…”) → a los 15 s pasa al **video** → cuando termina el video, vuelve a la frase, y así en loop.
 2. Si alguien **toca la pantalla** → **formulario**: nombre, mail, Instagram, TikTok y seguidores de cada red (tiene que completar al menos una red). Trae su propio teclado en pantalla.
+   Abajo tiene que **tildar por separado** las **Bases y Condiciones** y la **Declaración de Privacidad**. Cada una tiene su QR (para leerla en el celular) y se puede tocar para leerla en la TV. Sin los dos tildes no deja participar.
 3. Al confirmar → el **frasco**: su nombre cae adentro con los de los demás. Se pueden arrastrar con el dedo, sacudir el frasco con el botón o dándole un toque al vidrio. A los 30 s vuelve a la frase (siempre 30 s, se interactúe o no; se cambia en el panel).
 4. **Sorteo**: botón **“Sorteo”** abajo a la derecha (visible en la pantalla de inicio y en la del frasco) → clave **3602**.
 
@@ -26,7 +27,14 @@ No se puede inscribir dos veces el mismo **mail**, **Instagram** ni **TikTok** (
 
 ## Video
 
-Poné el video en **`video/video.mp4`**. Mientras no exista, la app se queda en la frase (vuelve a animarse cada 15 s).
+El video del loop es **`video/video.mp4`** (Totem Beauty Afiliados y Creadores). Para cambiarlo, reemplazá ese archivo. Si falta, la app se queda en la frase (vuelve a animarse cada 15 s).
+
+## Bases y Condiciones y Declaración de Privacidad
+
+- Los PDF están en `legal/bases.pdf` y `legal/privacidad.pdf`. Los QR apuntan a su copia publicada en GitHub Pages (https://fspdev.github.io/ML-BEAUTY_sorteo/legal/…), así que se leen desde el celular aunque la notebook no tenga internet.
+- Si cambia algún documento: reemplazá el PDF (mismo nombre), actualizá la `version` en `LEGAL` al principio de `js/app.js` y subilo al repo. Los QR no cambian.
+- Para imprimir: carpeta **`imprimir/`** → `QR-Bases-y-Privacidad.pdf` (hoja A4) y los QR sueltos en PNG y SVG.
+- Por cada inscripto queda registrado: si aceptó cada documento, la **fecha y hora exacta** en que tildó cada uno y la **versión** aceptada (columnas nuevas en el Excel).
 
 ## Los datos (lo más importante)
 
@@ -72,6 +80,8 @@ js/keyboard.js      teclado en pantalla
 js/db.js            guardado doble (disco + navegador)
 server.js           servidor local sin dependencias (puerto 3602)
 lib/, fonts/        matter.js y Montserrat locales (funciona offline)
-images/             logo y QR
-video/              acá va video.mp4
+images/             logo y QR (Afiliados, Bases, Privacidad)
+legal/              Bases y Condiciones y Declaración de Privacidad (PDF)
+imprimir/           QR de Bases y Privacidad listos para imprimir
+video/              video.mp4 del loop
 ```

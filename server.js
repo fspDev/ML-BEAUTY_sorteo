@@ -54,16 +54,22 @@ function csvCell(v) {
   return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
+const fecha = iso => iso ? new Date(iso).toLocaleString('es-AR', { hour12: false }) : '';
+
 function toCSV(list) {
   // Separador ";" para que Excel en español lo abra en columnas
   const head = ['Fecha', 'Nombre', 'Email', 'Instagram', 'Seguidores Instagram',
-                'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok', 'ID'];
+                'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok',
+                'Acepta Bases y Condiciones', 'Fecha aceptación ByC', 'Versión ByC',
+                'Acepta Declaración de Privacidad', 'Fecha aceptación DDP', 'Versión DDP', 'ID'];
   const rows = list.map(p => [
     p.fechaLocal, p.nombre, p.email,
     p.instagram ? '@' + p.instagram : '', p.instagram ? p.seguidoresInstagram : '',
     p.tiktok ? '@' + p.tiktok : '', p.tiktok ? p.seguidoresTiktok : '',
     p.instagram ? 'https://instagram.com/' + p.instagram : '',
     p.tiktok ? 'https://tiktok.com/@' + p.tiktok : '',
+    p.aceptaBases ? 'SÍ' : 'NO', fecha(p.aceptaBasesFecha), p.aceptaBasesVersion || '',
+    p.aceptaPrivacidad ? 'SÍ' : 'NO', fecha(p.aceptaPrivacidadFecha), p.aceptaPrivacidadVersion || '',
     p.id
   ]);
   return '﻿' + [head, ...rows].map(r => r.map(csvCell).join(';')).join('\r\n');
@@ -102,14 +108,20 @@ function clean(p) {
   const out = {
     id:                  String(p.id || '').slice(0, 64),
     fecha:               String(p.fecha || new Date().toISOString()),
-    fechaLocal:          String(p.fechaLocal || new Date().toLocaleString('es-AR')),
+    fechaLocal:          String(p.fechaLocal || new Date().toLocaleString('es-AR', { hour12: false })),
     nombre:              String(p.nombre || '').trim().slice(0, 80),
     email:               norm(p.email).slice(0, 120),
     instagram:           handle(p.instagram),
     seguidoresInstagram: num(p.seguidoresInstagram),
     tiktok:              handle(p.tiktok),
     seguidoresTiktok:    num(p.seguidoresTiktok),
-    acepta:              !!p.acepta
+    acepta:              !!p.acepta,
+    aceptaBases:             !!p.aceptaBases,
+    aceptaBasesFecha:        p.aceptaBasesFecha ? String(p.aceptaBasesFecha).slice(0, 40) : null,
+    aceptaBasesVersion:      String(p.aceptaBasesVersion || '').slice(0, 120),
+    aceptaPrivacidad:        !!p.aceptaPrivacidad,
+    aceptaPrivacidadFecha:   p.aceptaPrivacidadFecha ? String(p.aceptaPrivacidadFecha).slice(0, 40) : null,
+    aceptaPrivacidadVersion: String(p.aceptaPrivacidadVersion || '').slice(0, 120)
   };
   if (!out.id || out.nombre.length < 2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(out.email)
       || (!out.instagram && !out.tiktok)) return null;
