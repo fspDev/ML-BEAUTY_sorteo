@@ -58,12 +58,12 @@ const fecha = iso => iso ? new Date(iso).toLocaleString('es-AR', { hour12: false
 
 function toCSV(list) {
   // Separador ";" para que Excel en español lo abra en columnas
-  const head = ['Fecha', 'Nombre', 'Email', 'Instagram', 'Seguidores Instagram',
+  const head = ['Fecha', 'Nombre', 'Email', 'Celular', 'Edad', 'Reside en Argentina', 'Instagram', 'Seguidores Instagram',
                 'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok',
                 'Acepta Bases y Condiciones', 'Fecha aceptación ByC', 'Versión ByC',
                 'Acepta Declaración de Privacidad', 'Fecha aceptación DDP', 'Versión DDP', 'Texto aceptado ByC', 'Texto aceptado DDP', 'ID'];
   const rows = list.map(p => [
-    p.fechaLocal, p.nombre, p.email,
+    p.fechaLocal, p.nombre, p.email, p.telefono || '', p.edad || '', p.resideArgentina ? 'SÍ' : 'NO',
     p.instagram ? '@' + p.instagram : '', p.instagram ? p.seguidoresInstagram : '',
     p.tiktok ? '@' + p.tiktok : '', p.tiktok ? p.seguidoresTiktok : '',
     p.instagram ? 'https://instagram.com/' + p.instagram : '',
@@ -112,6 +112,9 @@ function clean(p) {
     fechaLocal:          String(p.fechaLocal || new Date().toLocaleString('es-AR', { hour12: false })),
     nombre:              String(p.nombre || '').trim().slice(0, 80),
     email:               norm(p.email).slice(0, 120),
+    telefono:            String(p.telefono || '').replace(/D/g, '').slice(0, 20),
+    edad:                num(p.edad),
+    resideArgentina:     p.resideArgentina === true,
     instagram:           handle(p.instagram),
     seguidoresInstagram: num(p.seguidoresInstagram),
     tiktok:              handle(p.tiktok),
@@ -129,6 +132,8 @@ function clean(p) {
   };
   // Sin aceptación de las ByC no se guarda la inscripción
   if (!out.acepta || !out.aceptaBases || !out.aceptaPrivacidad) return null;
+  // Requisitos de las Bases: mayor de 18, residir en Argentina y un celular de contacto
+  if (out.edad < 18 || !out.resideArgentina || out.telefono.length < 8) return null;
   if (!out.id || out.nombre.length < 2 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(out.email)
       || (!out.instagram && !out.tiktok)) return null;
   return out;

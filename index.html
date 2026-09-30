@@ -79,6 +79,25 @@
         <div class="field-msg"></div>
       </div>
 
+      <div class="field" data-key="telefono">
+        <input id="f-tel" type="text" placeholder=" " inputmode="none" data-kb="number" maxlength="13">
+        <label for="f-tel">Celular (con código de área)</label>
+        <div class="field-msg"></div>
+      </div>
+      <div class="field" data-key="edad">
+        <input id="f-edad" type="text" placeholder=" " inputmode="none" data-kb="number" maxlength="2">
+        <label for="f-edad">Edad</label>
+        <div class="field-msg"></div>
+      </div>
+      <div class="reside span-2" id="reside">
+        <div class="reside-q">¿Vivís en Argentina?</div>
+        <div class="reside-opts">
+          <button type="button" class="reside-opt" data-v="si">Sí</button>
+          <button type="button" class="reside-opt" data-v="no">No</button>
+        </div>
+        <div class="reside-msg" id="reside-msg"></div>
+      </div>
+
       <div class="net-label">Tus redes <span>— completá al menos una</span></div>
 
       <div class="field handle" data-key="instagram">
@@ -216,14 +235,14 @@
       <div class="tab-section active" id="tab-leads">
         <table class="admin-table">
           <thead><tr>
-            <th>Fecha</th><th>Nombre</th><th>Mail</th><th>Instagram</th><th>Seg. IG</th><th>TikTok</th><th>Seg. TikTok</th><th>ByC</th><th></th>
+            <th>Fecha</th><th>Nombre</th><th>Mail</th><th>Celular</th><th>Edad</th><th>Instagram</th><th>Seg. IG</th><th>TikTok</th><th>Seg. TikTok</th><th>ByC</th><th></th>
           </tr></thead>
           <tbody id="admin-tbody"></tbody>
         </table>
       </div>
       <div class="tab-section" id="tab-draws">
         <table class="admin-table">
-          <thead><tr><th>Fecha</th><th>Ganador/a</th><th>Mail</th><th>Instagram</th><th>TikTok</th><th>Tipo</th><th>Participantes</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Ganador/a</th><th>Mail</th><th>Celular</th><th>Instagram</th><th>TikTok</th><th>Tipo</th><th>Participantes</th></tr></thead>
           <tbody id="draws-tbody"></tbody>
         </table>
       </div>

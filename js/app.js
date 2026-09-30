@@ -130,10 +130,11 @@ $('#s-video').addEventListener('click', startForm);
 // ============================================================
 const F = {
   nombre: $('#f-nombre'), email: $('#f-email'),
+  telefono: $('#f-tel'), edad: $('#f-edad'),
   instagram: $('#f-ig'), seguidoresInstagram: $('#f-ig-seg'),
   tiktok: $('#f-tt'), seguidoresTiktok: $('#f-tt-seg'),
 };
-const ORDER = ['nombre', 'email', 'instagram', 'seguidoresInstagram', 'tiktok', 'seguidoresTiktok'];
+const ORDER = ['nombre', 'email', 'telefono', 'edad', 'instagram', 'seguidoresInstagram', 'tiktok', 'seguidoresTiktok'];
 // Documentos legales: cada uno se acepta por separado y queda registrado con fecha, texto y versión.
 // Si cambia un PDF, cambiar su versión.
 const LEGAL = {
@@ -142,6 +143,10 @@ const LEGAL = {
 };
 const consent = { bases: null, privacidad: null };   // fecha ISO en que se tildó, o null
 const consentOk = () => !!(consent.bases && consent.privacidad);
+// Requisitos de las Bases (punto 3.3): mayor de 18 y residir en Argentina
+const EDAD_MIN = 18;
+let resideArg = null;   // true | false | null (sin responder)
+const RESIDE_MSG = 'Para participar tenés que vivir en Argentina';
 const consentBtn = k => $(`.consent[data-consent="${k}"]`);
 
 const fieldOf = key => F[key].closest('.field');
@@ -166,6 +171,7 @@ function resetForm() {
     consentBtn(k).setAttribute('aria-pressed', 'false');
   });
   closeDoc();
+  setReside(null);
   $('#form-error').textContent = '';
   $('#btn-submit').classList.remove('enabled', 'busy');
   $('#btn-submit').textContent = '¡Quiero participar!';
@@ -190,6 +196,8 @@ const SANITIZE = {
   email: v => v.toLowerCase().replace(/\s/g, ''),
   instagram: cleanHandle,
   tiktok: cleanHandle,
+  telefono: v => v.replace(/D/g, '').slice(0, 13),
+  edad: v => v.replace(/D/g, '').replace(/^0+/, '').slice(0, 2),
   seguidoresInstagram: v => { const d = v.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 10); return d ? fmtNum(+d) : ''; },
 };
 SANITIZE.seguidoresTiktok = SANITIZE.seguidoresInstagram;
@@ -200,6 +208,8 @@ function values() {
   return {
     nombre: F.nombre.value.trim(),
     email: F.email.value.trim(),
+    telefono: F.telefono.value,
+    edad: F.edad.value,
     instagram: F.instagram.value,
     seguidoresInstagram: F.seguidoresInstagram.value,
     tiktok: F.tiktok.value,
@@ -215,6 +225,12 @@ function check(key, v = values()) {
     case 'email':
       if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(v.email)) return 'Revisá el mail';
       return DB.findDuplicate({ email: v.email }) ? 'Este mail ya está participando' : '';
+    case 'telefono':
+      if (!v.telefono) return 'Escribí tu celular';
+      return v.telefono.length >= 8 ? '' : 'Revisá el celular (con código de área)';
+    case 'edad':
+      if (!v.edad) return 'Escribí tu edad';
+      return +v.edad >= EDAD_MIN ? '' : 'Tenés que ser mayor de 18 años para participar';
     case 'instagram':
       if (!v.instagram) return (!v.tiktok) ? 'Completá Instagram o TikTok' : '';
       if (/^\.|\.$/.test(v.instagram)) return 'Revisá el usuario';
@@ -240,7 +256,7 @@ function setFieldState(key, msg, show) {
 
 function refreshSubmit() {
   const v = values();
-  const ok = ORDER.every(k => !check(k, v)) && consentOk();
+  const ok = ORDER.every(k => !check(k, v)) && resideArg === true && consentOk();
   $('#btn-submit').classList.toggle('enabled', ok);
   return ok;
 }
@@ -294,6 +310,12 @@ function nextField(input) {
   const keys = enabledOrder();
   const i = keys.findIndex(k => F[k] === input);
   const next = keys[i + 1];
+  // Después de la edad, si falta responder dónde vive, llevarlo a esa pregunta
+  if (F.edad === input && resideArg === null) {
+    input.blur();
+    setTimeout(() => $('#reside').scrollIntoView({ block: 'center', behavior: 'smooth' }), 350);
+    return;
+  }
   if (next) focusField(F[next]);
   else {
     input.blur();
@@ -308,6 +330,20 @@ $$('.consent[data-consent]').forEach(btn => btn.addEventListener('click', () => 
   btn.classList.remove('invalid');
   btn.setAttribute('aria-pressed', String(!!consent[k]));
   refreshSubmit();
+}));
+
+function setReside(v) {
+  resideArg = v;
+  $$('.reside-opt').forEach(b => b.classList.toggle('on', v !== null && (b.dataset.v === 'si') === v));
+  $('#reside').classList.toggle('invalid', v === false);
+  $('#reside-msg').textContent = v === false ? RESIDE_MSG : '';
+}
+$$('.reside-opt').forEach(btn => btn.addEventListener('click', () => {
+  setReside(btn.dataset.v === 'si');
+  $('#form-error').textContent = '';
+  refreshSubmit();
+  // Respondió que sí y todavía no cargó redes: seguir con Instagram
+  if (resideArg && !F.instagram.value && !F.tiktok.value) setTimeout(() => focusField(F.instagram), 250);
 }));
 
 // Visor de documentos (el QR es para leerlos en el celular; acá también se pueden leer en la TV)
@@ -372,18 +408,25 @@ $('#btn-submit').addEventListener('click', submit);
 async function submit() {
   const v = values();
   const bad = ORDER.filter(k => check(k, v));
-  if (bad.length || !consentOk()) {
+  if (bad.length || resideArg !== true || !consentOk()) {
     bad.forEach(k => {
       setFieldState(k, check(k, v), true);
       const f = fieldOf(k);
       f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake');
     });
+    if (resideArg !== true) {
+      const r = $('#reside');
+      r.classList.add('invalid');
+      $('#reside-msg').textContent = resideArg === false ? RESIDE_MSG : 'Respondé si vivís en Argentina';
+      r.classList.remove('shake'); void r.offsetWidth; r.classList.add('shake');
+    }
     Object.keys(consent).filter(k => !consent[k]).forEach(k => {
       const c = consentBtn(k);
       c.classList.add('invalid');
       c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
     });
     $('#form-error').textContent = bad.length ? fieldOf(bad[0]).querySelector('.field-msg').textContent
+                                              : resideArg !== true ? $('#reside-msg').textContent
                                               : !consent.bases && !consent.privacidad ? 'Falta aceptar las Bases y Condiciones y la Declaración de Privacidad'
                                               : !consent.bases ? 'Falta aceptar las Bases y Condiciones'
                                               : 'Falta aceptar la Declaración de Privacidad';
@@ -402,6 +445,9 @@ async function submit() {
     fechaLocal: now.toLocaleString('es-AR', { hour12: false }),
     nombre: v.nombre.replace(/\s+/g, ' '),
     email: v.email,
+    telefono: v.telefono,
+    edad: +v.edad,
+    resideArgentina: true,
     instagram: v.instagram,
     seguidoresInstagram: v.instagram ? digits(v.seguidoresInstagram) || 0 : 0,
     tiktok: v.tiktok,
@@ -545,7 +591,7 @@ async function runDraw(isSub) {
     fecha: now.toISOString(),
     fechaLocal: now.toLocaleString('es-AR', { hour12: false }),
     participanteId: w.id,
-    nombre: w.nombre, email: w.email,
+    nombre: w.nombre, email: w.email, telefono: w.telefono || '',
     instagram: w.instagram, tiktok: w.tiktok,
     participantes: pool.length,
     tipo: isSub ? 'Suplente' : 'Ganador/a',
@@ -716,21 +762,23 @@ function renderAdmin() {
       <td>${esc(p.fechaLocal)}</td>
       <td>${esc(p.nombre)}${DB.isPending(p.id) ? ' <span class="pending">• sin disco</span>' : ''}</td>
       <td>${esc(p.email)}</td>
+      <td>${esc(p.telefono || '—')}</td>
+      <td class="num">${p.edad || '—'}</td>
       <td>${p.instagram ? '@' + esc(p.instagram) : '—'}</td>
       <td class="num">${p.instagram ? fmtNum(p.seguidoresInstagram) : '—'}</td>
       <td>${p.tiktok ? '@' + esc(p.tiktok) : '—'}</td>
       <td class="num">${p.tiktok ? fmtNum(p.seguidoresTiktok) : '—'}</td>
       <td title="ByC: ${esc(fmtFecha(p.aceptaBasesFecha))} · DDP: ${esc(fmtFecha(p.aceptaPrivacidadFecha))}">${p.aceptaBases && p.aceptaPrivacidad ? '✓' : '—'}</td>
       <td><button class="row-del" data-id="${esc(p.id)}" title="Eliminar">✕</button></td>
-    </tr>`).join('') : '<tr><td colspan="9" class="admin-empty">Todavía no hay inscriptos</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="11" class="admin-empty">Todavía no hay inscriptos</td></tr>';
 
   const draws = [...DB.draws].sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
   $('#draws-tbody').innerHTML = draws.length ? draws.map(d => `
     <tr>
-      <td>${esc(d.fechaLocal)}</td><td><b>${esc(d.nombre)}</b></td><td>${esc(d.email)}</td>
+      <td>${esc(d.fechaLocal)}</td><td><b>${esc(d.nombre)}</b></td><td>${esc(d.email)}</td><td>${esc(d.telefono || '—')}</td>
       <td>${d.instagram ? '@' + esc(d.instagram) : '—'}</td><td>${d.tiktok ? '@' + esc(d.tiktok) : '—'}</td>
       <td>${esc(d.tipo)}</td><td class="num">${fmtNum(d.participantes)}</td>
-    </tr>`).join('') : '<tr><td colspan="7" class="admin-empty">Todavía no se hizo ningún sorteo</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="8" class="admin-empty">Todavía no se hizo ningún sorteo</td></tr>';
 
 }
 
@@ -792,9 +840,9 @@ const legalCols = p => [p.aceptaBases ? 'SÍ' : 'NO', fmtFecha(p.aceptaBasesFech
 $('#btn-export-csv').addEventListener('click', () => {
   const list = [...DB.participants].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
   if (!list.length) return toast('No hay inscriptos para descargar');
-  const head = ['Fecha', 'Nombre', 'Email', 'Instagram', 'Seguidores Instagram', 'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok', ...LEGAL_HEAD, 'ID'];
+  const head = ['Fecha', 'Nombre', 'Email', 'Celular', 'Edad', 'Reside en Argentina', 'Instagram', 'Seguidores Instagram', 'TikTok', 'Seguidores TikTok', 'Link Instagram', 'Link TikTok', ...LEGAL_HEAD, 'ID'];
   const rows = list.map(p => [
-    p.fechaLocal, p.nombre, p.email,
+    p.fechaLocal, p.nombre, p.email, p.telefono || '', p.edad || '', p.resideArgentina ? 'SÍ' : 'NO',
     p.instagram ? '@' + p.instagram : '', p.instagram ? p.seguidoresInstagram : '',
     p.tiktok ? '@' + p.tiktok : '', p.tiktok ? p.seguidoresTiktok : '',
     p.instagram ? 'https://instagram.com/' + p.instagram : '',

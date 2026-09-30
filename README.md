@@ -6,7 +6,7 @@ Está pensada para una **TV táctil de 55" en vertical** conectada a una noteboo
 ## Cómo funciona
 
 1. **Frase** (“¿Sos creador de contenido?…”) → a los 15 s pasa al **video** → cuando termina el video, vuelve a la frase, y así en loop.
-2. Si alguien **toca la pantalla** → **formulario**: nombre, mail, Instagram, TikTok y seguidores de cada red (tiene que completar al menos una red). Trae su propio teclado en pantalla.
+2. Si alguien **toca la pantalla** → **formulario**: nombre, mail, celular, edad, si vive en Argentina, Instagram, TikTok y seguidores de cada red (tiene que completar al menos una red). Por las Bases (punto 3.3) no deja participar a menores de 18 ni a quien no vive en Argentina. Trae su propio teclado en pantalla.
    Abajo tiene que **tildar por separado** las **Bases y Condiciones** y la **Declaración de Privacidad**. Cada una tiene su QR (para leerla en el celular) y se puede tocar para leerla en la TV. Sin los dos tildes no deja participar.
 3. Al confirmar → el **frasco**: su nombre cae adentro con los de los demás. Se pueden arrastrar con el dedo, sacudir el frasco con el botón o dándole un toque al vidrio. A los 30 s vuelve a la frase (siempre 30 s, se interactúe o no; se cambia en el panel).
 4. **Sorteo**: botón **“Sorteo”** abajo a la derecha (visible en la pantalla de inicio y en la del frasco) → clave **3602**.
