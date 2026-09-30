@@ -65,7 +65,7 @@ const Jar = (() => {
       // vertical: texto arriba, botones abajo; se deja lugar arriba para que caiga el nombre nuevo
       by = a.bottom - H * 0.012;
       Hj = Math.max(H * 0.25, by - a.top - H * 0.03); Wj = Hj * 0.95;
-      const maxW = W * 0.86;
+      const maxW = W * 0.78;   // deja margen a los costados
       if (Wj > maxW) { Wj = maxW; Hj = Wj / 0.95; }
       cx = W / 2;
     }

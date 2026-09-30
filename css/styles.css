@@ -1002,3 +1002,35 @@ body[data-screen="s-admin"] .fab-sorteo,
   .form-error { font-size: 2.5vw; margin-top: -1.4vw; min-height: 1.2em; }
   .btn-primary { font-size: 4.2vw; padding: 2.8vw; }
 }
+
+/* ================================================================
+   MÁRGENES (vertical): nada pegado a los bordes de la TV
+================================================================ */
+@media (orientation: portrait) {
+  :root { --gutter: 9vw; --edge-b: 5vw; }
+  .topbar { padding-left: var(--gutter); padding-right: var(--gutter); }
+  .btn-cancel { right: var(--gutter); }
+  .bottombar { padding: 2.6vw var(--gutter) var(--edge-b); }
+  .fab-sorteo { right: var(--gutter); bottom: var(--edge-b); }
+
+  #s-attract { padding-left: calc(var(--gutter) + 2vw); padding-right: calc(var(--gutter) + 2vw); }
+  #s-attract .btn-huge { font-size: 3.8vw; padding: 3.8vw 5.2vw; max-width: 100%; }
+
+  .form-scroll { padding-left: var(--gutter); padding-right: var(--gutter); }
+  .jar-info { left: var(--gutter); right: var(--gutter); }
+  .winner-card { margin: 0 var(--gutter); }
+}
+@media (orientation: portrait) {
+  .at-question { font-size: 10vw; }
+  .at-prize-amount { font-size: 14.5vw; }
+  .at-prize-note { font-size: 3.3vw; }
+  .form-grid { row-gap: 2.6vw; }
+  .section-sub { margin-bottom: 1vh; }
+  .btn-primary { padding: 2.6vw; }
+}
+@media (orientation: portrait) {
+  #s-attract .btn-huge { font-size: 3.5vw; padding: 3.6vw 5vw; }
+  /* las dos tarjetas (QR + tilde) quedan a la misma altura */
+  .legal-doc { flex: 1; justify-content: center; }
+  .legal .consent { flex: 0 0 auto; min-height: 12.5vw; }
+}
