@@ -231,19 +231,6 @@ body[data-screen="s-form"] .btn-cancel { display: block; }
   object-fit: contain;
   background: #000;
 }
-.video-tap-hint {
-  position: absolute;
-  bottom: 4vh; left: 50%;
-  transform: translateX(-50%);
-  background: rgba(255,230,0,0.95);
-  color: var(--navy);
-  font-size: clamp(14px, 2.2vh, 30px);
-  font-weight: 800;
-  padding: 0.8em 1.8em;
-  border-radius: 100px;
-  box-shadow: 0 6px 30px rgba(0,0,0,0.35);
-  animation: floatBob 3s ease-in-out infinite;
-}
 
 /* ================================================================
    FORM
@@ -840,7 +827,6 @@ body[data-screen="s-admin"] .fab-sorteo,
 @keyframes bounceIn  { 0%{opacity:0;transform:scale(0.5)} 60%{opacity:1;transform:scale(1.08)} 80%{transform:scale(0.96)} 100%{transform:scale(1)} }
 @keyframes shake     { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-12px)} 30%{transform:translateX(12px)} 45%{transform:translateX(-8px)} 60%{transform:translateX(8px)} 75%{transform:translateX(-4px)} 90%{transform:translateX(4px)} }
 @keyframes pulseGlow { 0%,100%{opacity:0} 50%{opacity:1} }
-@keyframes floatBob  { 0%,100%{transform:translate(-50%, 0)} 50%{transform:translate(-50%, -10px)} }
 @keyframes popChar   { to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes sparkBurst {
   0%   { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r, 0deg)) translateY(0) scale(0.5); }
@@ -872,7 +858,6 @@ body[data-screen="s-admin"] .fab-sorteo,
   .at-prize-note { font-size: 3.7vw; line-height: 1.35; }
   #s-attract .btn-huge { font-size: 4.5vw; padding: 4.2vw 6vw; white-space: nowrap; border-radius: 2vw; }
   .at-count { font-size: 3.1vw; }
-  .video-tap-hint { font-size: 3.6vw; }
 
   /* Formulario */
   .form-scroll { padding: calc(var(--top-h) + 3vh) 7vw 4vh; }
