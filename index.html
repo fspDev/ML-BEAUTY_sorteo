@@ -43,10 +43,6 @@
     <div class="at-prize-amount">$200.000</div>
     <div class="at-prize-note">para canjear en Mercado Libre en <strong>productos de Belleza seleccionados</strong></div>
   </div>
-  <button class="btn-huge pulsing anim-5" tabindex="-1">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10"/><path d="M12 9.5a1.5 1.5 0 0 1 3 0V11"/><path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.6a6 6 0 0 1-4.7-2.3L4 15.3a1.6 1.6 0 0 1 2.4-2.1L9 15.5"/></svg>
-    Tocá la pantalla para participar
-  </button>
   <div class="at-count anim-6" id="at-count"></div>
 </div>
 
@@ -122,25 +118,25 @@
       </div>
 
       <div class="legal span-2" id="legal">
-        <div class="legal-head">Antes de participar, leé y aceptá los dos documentos</div>
+        <div class="legal-head">Antes de participar, escaneá los QR, leé y aceptá los dos documentos</div>
         <div class="legal-grid">
           <div class="legal-card">
-            <button type="button" class="legal-doc" data-doc="bases">
+            <div class="legal-doc">
               <img src="images/qr-bases.png" alt="QR Bases y Condiciones">
               <span class="legal-name">Bases y Condiciones</span>
-              <span class="legal-how">Escaneá el QR o tocá acá para leer</span>
-            </button>
+              <span class="legal-how">Escaneá el QR con tu celular para leerla</span>
+            </div>
             <button type="button" class="consent" data-consent="bases" aria-pressed="false">
               <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
               <span>Leí y acepto las <b>Bases y Condiciones</b></span>
             </button>
           </div>
           <div class="legal-card">
-            <button type="button" class="legal-doc" data-doc="privacidad">
+            <div class="legal-doc">
               <img src="images/qr-privacidad.png" alt="QR Declaración de Privacidad">
               <span class="legal-name">Declaración de Privacidad</span>
-              <span class="legal-how">Escaneá el QR o tocá acá para leer</span>
-            </button>
+              <span class="legal-how">Escaneá el QR con tu celular para leerla</span>
+            </div>
             <button type="button" class="consent" data-consent="privacidad" aria-pressed="false">
               <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
               <span>Leí y acepto la <b>Declaración de Privacidad</b></span>
@@ -300,17 +296,6 @@
       <button data-d="7">7</button><button data-d="8">8</button><button data-d="9">9</button>
       <button class="muted" data-d="cancel">Cancelar</button><button data-d="0">0</button><button class="muted" data-d="back">⌫</button>
     </div>
-  </div>
-</div>
-
-<!-- Visor de Bases / Privacidad dentro del kiosco -->
-<div class="doc-layer" id="doc-layer">
-  <div class="doc-sheet">
-    <div class="doc-bar">
-      <div class="doc-title" id="doc-title"></div>
-      <button type="button" class="doc-close" id="doc-close">Cerrar ✕</button>
-    </div>
-    <iframe id="doc-frame" title="Documento"></iframe>
   </div>
 </div>
 

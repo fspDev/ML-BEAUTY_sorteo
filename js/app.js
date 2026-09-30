@@ -135,11 +135,11 @@ const F = {
   tiktok: $('#f-tt'), seguidoresTiktok: $('#f-tt-seg'),
 };
 const ORDER = ['nombre', 'email', 'telefono', 'edad', 'instagram', 'seguidoresInstagram', 'tiktok', 'seguidoresTiktok'];
-// Documentos legales: cada uno se acepta por separado y queda registrado con fecha, texto y versión.
-// Si cambia un PDF, cambiar su versión.
+// Documentos legales (se leen solo por QR): cada uno se acepta por separado y queda registrado
+// con fecha, texto y versión. Si cambia un PDF, cambiar su versión.
 const LEGAL = {
-  bases:      { titulo: 'Bases y Condiciones',       archivo: 'legal/bases.pdf',       version: 'ByC Sorteo Afiliados ExpoEstética (26/09/2026)' },
-  privacidad: { titulo: 'Declaración de Privacidad', archivo: 'legal/privacidad.pdf', version: 'DDP Expo Estética Beauty (23/09/2026)' },
+  bases:      { version: 'ByC Sorteo Afiliados ExpoEstética (26/09/2026)' },
+  privacidad: { version: 'DDP Expo Estética Beauty (23/09/2026)' },
 };
 const consent = { bases: null, privacidad: null };   // fecha ISO en que se tildó, o null
 const consentOk = () => !!(consent.bases && consent.privacidad);
@@ -170,7 +170,6 @@ function resetForm() {
     consentBtn(k).classList.remove('checked', 'invalid');
     consentBtn(k).setAttribute('aria-pressed', 'false');
   });
-  closeDoc();
   setReside(null);
   $('#form-error').textContent = '';
   $('#btn-submit').classList.remove('enabled', 'busy');
@@ -180,8 +179,7 @@ function resetForm() {
 
 function bumpFormIdle() {
   clearTimeout(formIdleT);
-  const secs = $('#doc-layer').classList.contains('show') ? Math.max(cfg.formIdleSecs, 300) : cfg.formIdleSecs;  // leyendo un documento: más margen
-  formIdleT = setTimeout(() => { if (current === 's-form') { closeDoc(); showAttract(); } }, secs * 1000);
+  formIdleT = setTimeout(() => { if (current === 's-form') showAttract(); }, cfg.formIdleSecs * 1000);
 }
 
 // Limpieza de lo que se escribe
@@ -345,24 +343,6 @@ $$('.reside-opt').forEach(btn => btn.addEventListener('click', () => {
   // Respondió que sí y todavía no cargó redes: seguir con Instagram
   if (resideArg && !F.instagram.value && !F.tiktok.value) setTimeout(() => focusField(F.instagram), 250);
 }));
-
-// Visor de documentos (el QR es para leerlos en el celular; acá también se pueden leer en la TV)
-$$('.legal-doc').forEach(btn => btn.addEventListener('click', () => openDoc(btn.dataset.doc)));
-$('#doc-close').addEventListener('click', closeDoc);
-function openDoc(k) {
-  const d = LEGAL[k];
-  Keyboard.hide();
-  $('#doc-title').textContent = d.titulo;
-  $('#doc-frame').src = d.archivo + '#view=FitH&toolbar=0&navpanes=0';
-  $('#doc-layer').classList.add('show');
-  bumpFormIdle();
-}
-function closeDoc() {
-  if (!$('#doc-layer').classList.contains('show')) return;
-  $('#doc-layer').classList.remove('show');
-  $('#doc-frame').src = 'about:blank';
-  if (current === 's-form') bumpFormIdle();
-}
 
 // Tocar fuera de un campo oculta el teclado
 $('#form-scroll').addEventListener('pointerdown', e => {

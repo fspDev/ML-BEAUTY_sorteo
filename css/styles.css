@@ -938,42 +938,14 @@ body[data-screen="s-admin"] .fab-sorteo,
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   padding: clamp(10px, 1.4vh, 20px);
   border-radius: 12px; border: 1.5px solid var(--border);
-  background: var(--white); cursor: pointer; text-align: center;
+  background: var(--white); text-align: center;
   font-family: inherit; color: var(--navy);
 }
-.legal-doc:active { transform: scale(.98); }
 .legal-doc img { width: clamp(110px, 16vh, 220px); height: auto; aspect-ratio: 1; display: block; }
 .legal-name { font-size: clamp(14px, 1.9vh, 24px); font-weight: 900; }
 .legal-how { font-size: clamp(11px, 1.4vh, 17px); font-weight: 600; color: var(--gray); }
 .legal .consent { flex: 1; font-size: clamp(13px, 1.7vh, 22px); }
 .legal .consent b { color: var(--navy); }
-
-.doc-layer {
-  position: fixed; inset: 0; z-index: 2100;
-  background: rgba(26,26,40,0.78);
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; visibility: hidden; transition: opacity .2s, visibility 0s .2s;
-}
-.doc-layer.show { opacity: 1; pointer-events: all; visibility: visible; transition: opacity .2s; }
-.doc-sheet {
-  width: min(94vw, 1000px); height: 88vh;
-  background: var(--white); border-radius: 20px; overflow: hidden;
-  display: flex; flex-direction: column;
-  box-shadow: 0 30px 90px rgba(0,0,0,0.3);
-}
-.doc-bar {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: clamp(12px, 1.6vh, 22px) clamp(16px, 2vw, 28px);
-  background: var(--navy); color: var(--white);
-}
-.doc-title { font-size: clamp(16px, 2.2vh, 28px); font-weight: 900; }
-.doc-close {
-  border: none; border-radius: 999px; cursor: pointer; font-family: inherit;
-  background: var(--yellow); color: var(--navy);
-  font-size: clamp(15px, 2vh, 26px); font-weight: 800;
-  padding: clamp(10px, 1.3vh, 18px) clamp(18px, 2vw, 32px);
-}
-.doc-sheet iframe { flex: 1; width: 100%; border: 0; background: #525659; }
 
 @media (orientation: portrait) {
   .legal { padding: 3vw; gap: 2.4vw; }
@@ -985,9 +957,6 @@ body[data-screen="s-admin"] .fab-sorteo,
   .legal-name { font-size: 3.3vw; }
   .legal-how { font-size: 2.5vw; }
   .legal .consent { font-size: 3vw; padding: 2.6vw 2.8vw; }
-  .doc-sheet { width: 94vw; height: 86vh; }
-  .doc-title { font-size: 4vw; }
-  .doc-close { font-size: 3.6vw; padding: 2.2vw 4vw; }
 }
 
 /* ¿Vivís en Argentina? */
