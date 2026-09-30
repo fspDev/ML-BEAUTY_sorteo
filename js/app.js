@@ -87,18 +87,11 @@ function showAttract() {
   if (document.activeElement) document.activeElement.blur();
   hideWinner();
   resetForm();
-  updateAttractCount();
   $('#btn-draw-link').style.display = '';
   goTo('s-attract');
   const s = $('#s-attract');
   s.classList.remove('play'); void s.offsetWidth; s.classList.add('play');
   attractT = setTimeout(playVideo, cfg.phraseSecs * 1000);
-}
-
-function updateAttractCount() {
-  const n = DB.participants.length;
-  $('#at-count').textContent = n === 0 ? '' :
-    n === 1 ? 'Ya hay 1 creador participando' : `Ya hay ${fmtNum(n)} creadores participando`;
 }
 
 function playVideo() {
@@ -518,9 +511,6 @@ function drawPool() {
   return DB.participants.filter(p => !excludeWinners || !w.has(p.id));
 }
 function updateDrawCount() {
-  const n = drawPool().length;
-  $('#draw-count-n').textContent = fmtNum(n);
-  $('#draw-count-lbl').textContent = n === 1 ? 'participante en el sorteo' : 'participantes en el sorteo';
   $('#draw-exclude').style.display = DB.draws.length ? '' : 'none';
 }
 
@@ -624,7 +614,7 @@ function showWinner(w, d) {
     s.textContent = `${net} @${h}`;
     hs.appendChild(s);
   });
-  $('#winner-meta').textContent = `Sorteado entre ${fmtNum(d.participantes)} participantes · ${d.fechaLocal}`;
+  $('#winner-meta').textContent = `Sorteado el ${d.fechaLocal}`;
   $('#winner-layer').classList.add('show');
   sparks();
 }
@@ -859,7 +849,6 @@ document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dragstart', e => e.preventDefault());
 
 DB.onChange(() => {
-  if (current === 's-attract') updateAttractCount();
   if (current === 's-admin') renderAdmin();
 });
 
@@ -878,7 +867,6 @@ new ResizeObserver(() => {
 Jar.init($('#jar-canvas'));
 showAttract();
 DB.sync().then(() => {
-  updateAttractCount();
   // Para probar pantallas: ?pantalla=formulario | frasco | sorteo
   const q = new URLSearchParams(location.search).get('pantalla');
   const lastP = [...DB.participants].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha))).pop();

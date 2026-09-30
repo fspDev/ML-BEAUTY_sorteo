@@ -432,7 +432,7 @@ const Jar = (() => {
     ctx.font = `900 ${lblH * 0.42}px Montserrat`;
     ctx.fillText('$200.000', g.cx, ly - lblH * 0.12);
     ctx.font = `700 ${lblH * 0.2}px Montserrat`;
-    ctx.fillText(hiddenCount > 0 ? `+ ${hiddenCount} nombres más` : 'EN BELLEZA', g.cx, ly + lblH * 0.27);
+    ctx.fillText('EN BELLEZA', g.cx, ly + lblH * 0.27);
     ctx.restore();
   }
 
