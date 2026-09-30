@@ -16,11 +16,20 @@ try { cfg = { ...CFG_DEFAULTS, ...JSON.parse(localStorage.getItem('mlb_cfg') || 
 
 // ── Utilidades ──────────────────────────────────────────────
 let current = 's-attract';
+let navAt = 0;
 function goTo(id) {
   $$('.screen').forEach(s => s.classList.toggle('active', s.id === id));
   current = id;
   document.body.dataset.screen = id;
+  navAt = performance.now();
 }
+
+// Muchas TVs táctiles mandan cada toque dos veces (como toque y como mouse).
+// El segundo caía en la pantalla nueva: p. ej. "Cancelar" volvía al inicio y el
+// duplicado reabría el formulario. Se ignoran los clics apenas cambia la pantalla.
+document.addEventListener('click', e => {
+  if (performance.now() - navAt < 500) { e.stopPropagation(); e.preventDefault(); }
+}, true);
 
 function uid() {
   if (crypto.randomUUID) try { return crypto.randomUUID(); } catch {}
@@ -127,7 +136,7 @@ const F = {
   instagram: $('#f-ig'), seguidoresInstagram: $('#f-ig-seg'),
   tiktok: $('#f-tt'), seguidoresTiktok: $('#f-tt-seg'),
 };
-const ORDER = ['nombre', 'email', 'telefono', 'edad', 'instagram', 'seguidoresInstagram', 'tiktok', 'seguidoresTiktok'];
+const ORDER = ['nombre', 'email', 'edad', 'telefono', 'instagram', 'seguidoresInstagram', 'tiktok', 'seguidoresTiktok'];
 // Documentos legales (se leen solo por QR): cada uno se acepta por separado y queda registrado
 // con fecha, texto y versión. Si cambia un PDF, cambiar su versión.
 const LEGAL = {
@@ -301,8 +310,8 @@ function nextField(input) {
   const keys = enabledOrder();
   const i = keys.findIndex(k => F[k] === input);
   const next = keys[i + 1];
-  // Después de la edad, si falta responder dónde vive, llevarlo a esa pregunta
-  if (F.edad === input && resideArg === null) {
+  // Después del celular, si falta responder dónde vive, llevarlo a esa pregunta
+  if (F.telefono === input && resideArg === null) {
     input.blur();
     setTimeout(() => $('#reside').scrollIntoView({ block: 'center', behavior: 'smooth' }), 350);
     return;

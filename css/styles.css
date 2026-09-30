@@ -951,3 +951,54 @@ body[data-screen="s-admin"] .fab-sorteo,
   .reside-opt { min-width: 15vw; padding: 2.2vw 3.6vw; font-size: 3.6vw; }
   .reside-msg { font-size: 2.8vw; }
 }
+
+/* Cerrado, el teclado queda fuera de pantalla: su pestaña "Ocultar teclado" tampoco se ve */
+.kb:not(.open) .kb-hide { visibility: hidden; }
+
+/* ================================================================
+   FORMULARIO EN VERTICAL: todo entra en una pantalla, sin scroll
+   (grilla de 6 columnas: Edad | Celular, Usuario | Seguidores)
+================================================================ */
+@media (orientation: portrait) {
+  body[data-screen="s-form"] .topbar { padding: 3vw 4vw 2vw; }
+  body[data-screen="s-form"] .topbar-logo { width: 26vw; }
+  .form-scroll { padding: calc(var(--top-h) + 1.2vh) 6vw 1.2vh; }
+  .section-title { font-size: 6vw; margin-bottom: 0.9vh; letter-spacing: -1px; }
+  .yellow-bar { margin-bottom: 0.6vh; height: 4px; }
+  .section-sub { font-size: 2.6vw; margin-bottom: 1.2vh; }
+
+  .form-grid { grid-template-columns: repeat(6, 1fr); column-gap: 2.4vw; row-gap: 3vw; }
+  .form-grid > * { grid-column: 1 / -1; }
+  .field[data-key="edad"] { grid-column: span 2; }
+  .field[data-key="telefono"] { grid-column: span 4; }
+  .field[data-key="instagram"], .field[data-key="seguidoresInstagram"],
+  .field[data-key="tiktok"], .field[data-key="seguidoresTiktok"] { grid-column: span 3; }
+
+  .field input, .field label, .field.handle::before { font-size: 3.3vw; }
+  .field input { padding: 3.6vw 2.8vw 1vw; }
+  .field.handle input { padding-left: calc(2.8vw + 1.05em); }
+  .field label, .field.handle::before { left: 2.8vw; }
+  .field.handle::before { bottom: 1vw; }
+  .field input:focus + label, .field.is-focused label, .field input:not(:placeholder-shown) + label { top: 2vw; }
+  .field-msg { font-size: 2.2vw; }
+  .net-label { font-size: 2.2vw; margin-bottom: -1.4vw; }
+
+  .reside { padding: 1.4vw 2.8vw; }
+  .reside-q { font-size: 3.1vw; }
+  .reside-opt { padding: 1.2vw 3.2vw; font-size: 3.1vw; min-width: 12vw; }
+  .reside-msg { font-size: 2.3vw; }
+
+  .legal { padding: 1.6vw 2vw; gap: 1.2vw; }
+  .legal-head { font-size: 2.5vw; }
+  .legal-grid { gap: 1.8vw; }
+  .legal-card { gap: 1vw; }
+  .legal-doc { padding: 1.2vw; gap: 0.4vw; }
+  .legal-doc img { width: 15vw; }
+  .legal-name { font-size: 2.5vw; }
+  .legal-how { font-size: 2vw; }
+  .legal .consent { font-size: 2.3vw; padding: 1.4vw 1.8vw; gap: 1.6vw; }
+  .legal .consent .box { width: 4.6vw; height: 4.6vw; }
+
+  .form-error { font-size: 2.5vw; margin-top: -1.4vw; min-height: 1.2em; }
+  .btn-primary { font-size: 4.2vw; padding: 2.8vw; }
+}
