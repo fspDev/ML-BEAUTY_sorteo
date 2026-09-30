@@ -10,6 +10,7 @@ Está pensada para una **TV táctil de 55" en vertical** conectada a una noteboo
    Abajo tiene que **tildar por separado** las **Bases y Condiciones** y la **Declaración de Privacidad**. Cada una tiene su QR (para leerla en el celular) (solo se accede por QR). Sin los dos tildes no deja participar.
 3. Al confirmar → el **frasco**: su nombre cae adentro con los de los demás. Se pueden arrastrar con el dedo, sacudir el frasco con el botón o dándole un toque al vidrio. A los 30 s vuelve a la frase (siempre 30 s, se interactúe o no; se cambia en el panel).
 4. **Sorteo**: botón **“Sorteo”** abajo a la derecha (visible en la pantalla de inicio y en la del frasco) → clave **3602**.
+   - Solo pueden ganar quienes tengan **más de 10.000 seguidores en al menos una red** (no se suman: 9.000 + 2.000 no alcanza). Todos figuran igual en la lista y en el frasco; el contador muestra siempre el total; la regla se aplica solo al elegir al ganador.
 
 El **logo** está arriba y el **QR** abajo a la izquierda en todas las pantallas, salvo mientras se reproduce el video (el QR tampoco se muestra en el formulario, porque ahí va el teclado). El QR lleva a https://www.mercadolibre.com.ar/l/afiliados?forceInApp=true (programa de Afiliados). Para cambiarlo: `npx qrcode -o images/qr.png -w 1000 -q 1 -e M -d 2D3277FF -l FFFFFF00 "<link>"`.
 

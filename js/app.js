@@ -515,6 +515,17 @@ let excludeWinners = true;
 let drawing = false;
 
 function winnerIds() { return new Set(DB.draws.map(d => d.participanteId)); }
+// Solo pueden ganar quienes tienen MÁS de 10.000 seguidores en al menos una red (no se suman).
+// Es una regla interna: todos figuran en la lista, el frasco y los conteos, pero el ganador sale solo de los habilitados.
+const MIN_FOLLOWERS = 10000;
+function maxFollowers(p) {
+  return Math.max(p.instagram ? +p.seguidoresInstagram || 0 : 0, p.tiktok ? +p.seguidoresTiktok || 0 : 0);
+}
+function isEligible(p) {
+  return (p.instagram && +p.seguidoresInstagram > MIN_FOLLOWERS) ||
+         (p.tiktok && +p.seguidoresTiktok > MIN_FOLLOWERS);
+}
+// Pool visible: todos los inscriptos (menos ganadores previos si corresponde).
 function drawPool() {
   const w = winnerIds();
   return DB.participants.filter(p => !excludeWinners || !w.has(p.id));
@@ -557,11 +568,17 @@ async function runDraw(isSub) {
   if (drawing) return;
   const pool = drawPool();
   if (!pool.length) { toast('No hay participantes para sortear'); return; }
+  let eligible = pool.filter(isEligible);
+  if (!eligible.length) {
+    // Nadie supera el mínimo: gana quien más seguidores tenga (en una sola red), y así con los suplentes.
+    const top = Math.max(...pool.map(maxFollowers));
+    eligible = pool.filter(p => maxFollowers(p) === top);
+  }
   drawing = true;
   setDrawBusy(true);
   Jar.shake(3000, 1.25);
   await sleep(3500);
-  const w = pool[secureRandomInt(pool.length)];
+  const w = eligible[secureRandomInt(eligible.length)];
   await Jar.extract({ id: w.id, label: labelFor(w), p: w });
   await sleep(250);
   const now = new Date();
