@@ -50,7 +50,7 @@ Cada inscripción se guarda **dos veces**:
 | Carpeta **`data/`** (doble clic en `ABRIR DATOS.bat`) | `participantes.csv` (se abre en Excel), `participantes.json`, `sorteos.json`, `registro.log.jsonl` (historial que nunca se borra) y `backups/` con una copia por hora |
 | El navegador del kiosco (carpeta `browser-profile/`) | Copia completa. Si el servidor se cae, se sigue guardando acá y se pasa al disco solo cuando vuelve |
 
-Además, desde el panel se puede **descargar el Excel** y un **respaldo JSON** en cualquier momento.
+Además, desde el panel se puede **descargar el Excel** y un **respaldo JSON** en cualquier momento, y con **“Cargar Excel (CSV) o respaldo”** se vuelven a cargar (suma los que falten; no duplica mail, Instagram ni TikTok, y nunca borra).
 
 **Al terminar el evento, copiá la carpeta `data/` a un pendrive.**
 
@@ -68,6 +68,8 @@ El sorteo usa un número aleatorio criptográfico (`crypto.getRandomValues`) sob
 ## Versión online (GitHub Pages)
 
 Cada push a `main` publica la app en GitHub Pages con GitHub Actions. **Es solo para mostrarla o probarla**: ahí no hay servidor, así que cada navegador guarda sus inscriptos únicamente en sí mismo (el panel lo avisa en naranja). Para el evento usá siempre la notebook con `INICIAR.bat`.
+
+**Sortear online con la lista de un evento:** abrí la página, entrá al panel (3 toques en el logo), tocá **“Cargar Excel (CSV) o respaldo”** y elegí el Excel que se descargó del kiosco. Los inscriptos quedan **solo en ese navegador** (nada se sube a GitHub). Las cargas de prueba se sacan con la ✕ de cada fila. Después, **Ir al sorteo**. Para empezar de cero: Configuración → Archivar inscriptos y vaciar.
 
 ## Para probar
 

@@ -851,6 +851,92 @@ $('#btn-export-json').addEventListener('click', () => {
   download(`respaldo_${stamp()}.json`, JSON.stringify({ exportado: new Date().toISOString(), participantes: DB.participants, sorteos: DB.draws }, null, 2), 'application/json');
 });
 
+// ---------- Cargar inscriptos desde un archivo (Excel exportado por la app o respaldo JSON) ----------
+// Los datos quedan sólo en este navegador (o en disco, si está el servidor del kiosco).
+function parseCSV(text) {
+  text = text.replace(/^﻿/, '');
+  const sep = (text.split(/\r?\n/)[0].match(/;/g) || []).length >= (text.split(/\r?\n/)[0].match(/,/g) || []).length ? ';' : ',';
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+      else if (c === '"') q = false;
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === sep) { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell); cell = '';
+      if (row.some(v => v.trim())) rows.push(row);
+      row = [];
+    } else cell += c;
+  }
+  row.push(cell);
+  if (row.some(v => v.trim())) rows.push(row);
+  return rows;
+}
+// "3/10/2026, 12:30:11" (hora de este equipo) → ISO. Si no se entiende, queda vacío.
+function parseFechaAR(s) {
+  const m = String(s || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) return '';
+  const d = new Date(+m[3], m[2] - 1, +m[1], +m[4], +m[5], +(m[6] || 0));
+  return isNaN(d) ? '' : d.toISOString();
+}
+function participantsFromCSV(text) {
+  const [head, ...rows] = parseCSV(text);
+  if (!head) return [];
+  const idx = {};
+  head.forEach((h, i) => { idx[h.trim().toLowerCase()] = i; });
+  const col = (r, name) => { const i = idx[name.toLowerCase()]; return i == null ? '' : String(r[i] ?? '').trim(); };
+  const si = v => /^s[ií]$/i.test(v);
+  const handle = v => v.replace(/^@/, '').trim();
+  const num = v => parseInt(String(v).replace(/\D/g, ''), 10) || 0;
+  return rows.map(r => {
+    const ig = handle(col(r, 'Instagram')), tt = handle(col(r, 'TikTok'));
+    const fechaLocal = col(r, 'Fecha');
+    return {
+      id: col(r, 'ID') || uid(),
+      fecha: parseFechaAR(fechaLocal) || new Date().toISOString(),
+      fechaLocal,
+      nombre: col(r, 'Nombre').replace(/\s+/g, ' '),
+      email: col(r, 'Email'),
+      telefono: col(r, 'Celular'),
+      edad: num(col(r, 'Edad')) || '',
+      resideArgentina: si(col(r, 'Reside en Argentina')),
+      instagram: ig, seguidoresInstagram: ig ? num(col(r, 'Seguidores Instagram')) : 0,
+      tiktok: tt, seguidoresTiktok: tt ? num(col(r, 'Seguidores TikTok')) : 0,
+      acepta: si(col(r, 'Acepta Bases y Condiciones')) && si(col(r, 'Acepta Declaración de Privacidad')),
+      aceptaBases: si(col(r, 'Acepta Bases y Condiciones')),
+      aceptaBasesFecha: parseFechaAR(col(r, 'Fecha aceptación ByC')),
+      aceptaBasesVersion: col(r, 'Versión ByC'),
+      aceptaBasesTexto: col(r, 'Texto aceptado ByC'),
+      aceptaPrivacidad: si(col(r, 'Acepta Declaración de Privacidad')),
+      aceptaPrivacidadFecha: parseFechaAR(col(r, 'Fecha aceptación DDP')),
+      aceptaPrivacidadVersion: col(r, 'Versión DDP'),
+      aceptaPrivacidadTexto: col(r, 'Texto aceptado DDP'),
+    };
+  }).filter(p => p.nombre && (p.instagram || p.tiktok));
+}
+
+$('#btn-import').addEventListener('click', () => { $('#import-file').value = ''; $('#import-file').click(); });
+$('#import-file').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  let list = [];
+  try {
+    const text = await f.text();
+    if (/\.json$/i.test(f.name) || /^\s*[[{]/.test(text)) {
+      const j = JSON.parse(text);
+      list = (Array.isArray(j) ? j : j.participantes || []).filter(p => p && p.id && p.nombre);
+    } else list = participantsFromCSV(text);
+  } catch { return toast('No se pudo leer el archivo', 4500); }
+  if (!list.length) return toast('El archivo no tiene inscriptos que se puedan cargar', 4500);
+  const { added, skipped } = DB.importMany(list);
+  toast(`Cargados: ${fmtNum(added)}` + (skipped ? ` · ya estaban: ${fmtNum(skipped)}` : ''), 4500);
+  renderAdmin();
+});
+
 $('#btn-archive').addEventListener('click', async () => {
   if (!confirm('Se va a guardar una copia y vaciar la lista de inscriptos para empezar un evento nuevo.\n¿Continuar?')) return;
   const pw = prompt('Escribí la clave para confirmar');

@@ -39,6 +39,9 @@ const DB = (() => {
     } finally { clearTimeout(t); }
   }
 
+  // Sin servidor: abierto como archivo o en la versión online (GitHub Pages). El kiosco (localhost) nunca entra acá.
+  const NO_SERVER = location.protocol === 'file:' || location.hostname.endsWith('github.io');
+
   const norm = s => String(s || '').trim().toLowerCase();
 
   function findDuplicate(p) {
@@ -52,7 +55,7 @@ const DB = (() => {
 
   // Une lo del servidor con lo que quedó sólo en el navegador y lo sube
   async function sync() {
-    if (location.protocol === 'file:') { online = false; emit(); return; }
+    if (NO_SERVER) { online = false; emit(); return; }
     try {
       // Se manda todo lo del navegador: el servidor agrega lo que le falte
       // (así también se recupera si alguien borró la carpeta data/)
@@ -84,7 +87,7 @@ const DB = (() => {
     const dup = findDuplicate(p);
     if (dup) return { ok: false, duplicate: dup };
 
-    if (location.protocol !== 'file:') {
+    if (!NO_SERVER) {
       try {
         const r = await api('/api/participants', { method: 'POST', body: JSON.stringify(p) });
         if (r.status === 409) { await sync(); return { ok: false, duplicate: r.body.field }; }
@@ -103,6 +106,21 @@ const DB = (() => {
     return { ok: true, participant: p, offline: true };
   }
 
+  // Carga manual (CSV o respaldo): suma los que falten, nunca pisa ni borra.
+  // Se saltean los que ya están (mismo ID, mail, Instagram o TikTok).
+  function importMany(list) {
+    let added = 0, skipped = 0;
+    for (const p of list) {
+      if (participants.some(q => q.id === p.id) || findDuplicate(p)) { skipped++; continue; }
+      participants.push(p);
+      if (!NO_SERVER) pending.add(p.id);
+      added++;
+    }
+    save(); emit();
+    if (added && !NO_SERVER) sync();
+    return { added, skipped };
+  }
+
   async function addDraw(d) {
     draws.push(d);
     pending.add(d.id);
@@ -114,10 +132,10 @@ const DB = (() => {
   }
 
   async function remove(id, password) {
-    if (location.protocol !== 'file:') try {
+    if (!NO_SERVER) try {
       const r = await api('/api/delete', { method: 'POST', body: JSON.stringify({ id, password }) });
       if (r.status !== 200) throw 0;
-    } catch { if (location.protocol !== 'file:') return false; }
+    } catch { if (!NO_SERVER) return false; }
     participants = participants.filter(p => p.id !== id);
     pending.delete(id);
     save(); emit();
@@ -143,7 +161,7 @@ const DB = (() => {
   setInterval(() => { if (!online || pending.size) sync(); }, 20000);
 
   return {
-    sync, add, addDraw, remove, archive, findDuplicate,
+    sync, add, addDraw, importMany, remove, archive, findDuplicate,
     get participants() { return participants; },
     get draws() { return draws; },
     get online() { return online; },
